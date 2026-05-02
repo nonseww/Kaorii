@@ -44,8 +44,12 @@ function App() {
         `Переведи этот текст на русский язык, сохранив смысл и стиль: \n\n${text}`,
     );
 
+  const handleExplainCode = () =>
+    runAction((text) => `Подробно объясни данный код: \n\n${text}`);
+
   useShortcut(handleSummarize, "Control+Alt+S");
   useShortcut(handleTranslate, "Control+Alt+T");
+  useShortcut(handleExplainCode, "Control+Alt+C");
 
   const sendMessage = async (text: string) => {
     await sendRequest({
