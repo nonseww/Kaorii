@@ -1,51 +1,43 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { useState, useEffect } from "react";
+import { Command } from "@tauri-apps/plugin-shell";
 import "./App.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [input, setInput] = useState<string>("");
+  const [messages, setMessages] = useState<any>([]);
+  const [isServerReady, setIsServerReady] = useState<boolean>(false);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const checkServerHealth = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8080/health");
+      return response.status === 200;
+    } catch (error) {
+      return false;
+    }
+  };
 
-  return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+  useEffect(() => {
+    const startLlamaServer = async () => {
+      const command = Command.sidecar("binaries/llama-server", [
+        "-m",
+        "models/gemma-2-2b-it-Q4_K_M.gguf",
+        "--port",
+        "8080",
+      ]);
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+      const child = await command.spawn();
+    };
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
-  );
+    startLlamaServer();
+
+    const healthCheckInterval = setInterval(async () => {
+      const isHealthy = await checkServerHealth();
+      setIsServerReady(isHealthy);
+    }, 2000);
+    return () => clearInterval(healthCheckInterval);
+  }, []);
+
+  return <>ready? : {isServerReady ? "yes" : "not yet"}</>;
 }
 
 export default App;
