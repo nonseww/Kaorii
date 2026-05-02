@@ -7,6 +7,8 @@ import { useLlamaServer } from "./hooks/useLlamaServer";
 import { sendRequest } from "./services/sendRequest";
 import { useToggleWindow } from "./hooks/useToggleWindow";
 import { useShortcutToggle } from "./hooks/useShortcutToggle";
+import { useShortcutSummarize } from "./hooks/useShortcutSummarize";
+import { useSummarize } from "./hooks/useSummarize";
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([
@@ -21,7 +23,19 @@ function App() {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const isServerReady = useLlamaServer();
   const toggleWindow = useToggleWindow({ isExpanded, setIsExpanded });
+
   useShortcutToggle({ toggleWindow });
+
+  const handleSummarize = useSummarize({
+    messages,
+    setMessages,
+    setIsLoading,
+    setError,
+    isExpanded,
+    toggleWindow,
+  });
+
+  useShortcutSummarize(handleSummarize);
 
   const sendMessage = async (text: string) => {
     await sendRequest({
