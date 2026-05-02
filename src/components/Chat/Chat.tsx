@@ -65,7 +65,7 @@ export const Chat = ({
       {isModalOpen && (
         <Modal
           title="Confirm"
-          text="Are you sure?"
+          text="Are you sure that you want to clear this chat?"
           onClose={() => setIsModalOpen(false)}
           onCancel={() => setIsModalOpen(false)}
           onSubmit={onClear}
