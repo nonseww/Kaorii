@@ -33,7 +33,7 @@ A lightweight, privacy-focused desktop AI assistant built with Tauri, React, and
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/llm_helper.git
+git clone https://github.com/nonseww/llm_helper.git
 cd llm_helper
 ```
 
