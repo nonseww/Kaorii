@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Command } from "@tauri-apps/plugin-shell";
+import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
 function App() {
   const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<any>([]);
+  const [modelPath, setModelPath] = useState<string>("");
   const [isServerReady, setIsServerReady] = useState<boolean>(false);
 
   const checkServerHealth = async () => {
@@ -18,14 +20,32 @@ function App() {
 
   useEffect(() => {
     const startLlamaServer = async () => {
+      const modelPath0 = await invoke<string>("get_model_path");
+      setModelPath(modelPath0);
+
       const command = Command.sidecar("binaries/llama-server", [
         "-m",
-        "models/gemma-2-2b-it-Q4_K_M.gguf",
+        modelPath0,
         "--port",
         "8080",
+        "-ngl",
+        "99",
+        "--host",
+        "127.0.0.1",
       ]);
 
+      command.stdout.on("data", (line) => console.log("LLAMA LOG:", line));
+      command.stderr.on("data", (line) => console.error("LLAMA ERROR:", line));
+
+      command.on("close", (data) =>
+        console.log(`Сервер закрылся с кодом ${data.code}`),
+      );
+      command.on("error", (error) =>
+        console.error(`Ошибка процесса: ${error}`),
+      );
+
       const child = await command.spawn();
+      console.log("Процесс запущен, PID:", child.pid);
     };
 
     startLlamaServer();
@@ -37,7 +57,11 @@ function App() {
     return () => clearInterval(healthCheckInterval);
   }, []);
 
-  return <>ready? : {isServerReady ? "yes" : "not yet"}</>;
+  return (
+    <>
+      ready? : {isServerReady ? "yes" : "not yet"}, path: {modelPath}
+    </>
+  );
 }
 
 export default App;
