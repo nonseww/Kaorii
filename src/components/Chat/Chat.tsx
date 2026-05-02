@@ -2,6 +2,7 @@ import type { Message } from "../../types/Message";
 import { MessageContent } from "../MessageContent";
 import { ChatInput } from "../ChatInput";
 import classes from "./Chat.module.scss";
+import { useDragWindow } from "../../hooks/useDragWindow";
 
 interface ChatProps {
   isServerReady: boolean;
@@ -20,8 +21,16 @@ export const Chat = ({
   sendMessage,
   onClick,
 }: ChatProps) => {
+  const { handleMouseDown, handleMouseMove, handleMouseUp } = useDragWindow();
+
   return (
-    <div onDoubleClick={onClick} className={classes.mainWindow}>
+    <div
+      onDoubleClick={onClick}
+      className={classes.mainWindow}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
       <h1 className={classes.title}>LLM_Helper is here :)</h1>
       <div className={classes.chat}>
         {messages
