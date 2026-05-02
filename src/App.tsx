@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Command } from "@tauri-apps/plugin-shell";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
+import { MessageContent } from "./MessageContent";
+import { ChatInput } from "./ChatInput";
 
 type Message = {
   role: "system" | "user" | "assistant";
@@ -9,7 +11,6 @@ type Message = {
 };
 
 function App() {
-  const [userInput, setUserInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
@@ -30,13 +31,12 @@ function App() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!userInput.trim()) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim()) return;
 
-    const newUserMessage: Message = { role: "user", content: userInput };
+    const newUserMessage: Message = { role: "user", content: text };
     const updatedMessages = [...messages, newUserMessage];
     setMessages(updatedMessages);
-    setUserInput("");
     setIsLoading(true);
 
     try {
@@ -117,20 +117,12 @@ function App() {
                 marginBottom: "10px",
               }}
             >
-              {m.content}
+              <MessageContent content={m.content} />
             </div>
           ))}
         {isLoading && <p>Thinking...</p>}
       </div>
-      <input
-        value={userInput}
-        onChange={(e) => setUserInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        placeholder="Ask..."
-      />
-      <button onClick={sendMessage} disabled={isLoading}>
-        Send
-      </button>
+      <ChatInput onSend={(text) => sendMessage(text)} disabled={isLoading} />
       {error && <div>{error}</div>}
     </div>
   );
