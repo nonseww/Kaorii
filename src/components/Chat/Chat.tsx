@@ -21,26 +21,25 @@ export const Chat = ({
   onClick,
 }: ChatProps) => {
   return (
-    <div onClick={onClick} className={classes.mainWindow}>
-      <h1>LLM_Helper!</h1>
-      <h2>{isServerReady ? "Server is ready!" : "Wait..."}</h2>
-      <div>
+    <div onDoubleClick={onClick} className={classes.mainWindow}>
+      <h1 className={classes.title}>LLM_Helper is here :)</h1>
+      <div className={classes.chat}>
         {messages
           .filter((m) => m.role !== "system")
           .map((m, i) => (
             <div
               key={i}
-              style={{
-                textAlign: m.role === "user" ? "right" : "left",
-                marginBottom: "10px",
-              }}
+              className={`${classes.messageWrapper} ${m.role === "user" ? classes.userMessage : classes.aiMessage}`}
             >
               <MessageContent content={m.content} />
             </div>
           ))}
         {isLoading && <p>Thinking...</p>}
       </div>
-      <ChatInput onSend={(text) => sendMessage(text)} disabled={isLoading} />
+      <ChatInput
+        onSend={(text) => sendMessage(text)}
+        disabled={isLoading || !isServerReady}
+      />
       {error && <div>{error}</div>}
     </div>
   );

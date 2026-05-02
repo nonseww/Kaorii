@@ -1,4 +1,5 @@
 import { useState } from "react";
+import classes from "./ChatInput.module.scss";
 
 interface Props {
   onSend: (text: string) => void;
@@ -15,14 +16,19 @@ export const ChatInput = ({ onSend, disabled }: Props) => {
   };
 
   return (
-    <div>
-      <input
+    <div className={classes.container}>
+      <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
         placeholder="Ask..."
+        className={classes.textarea}
       />
-      <button onClick={handleSend} disabled={disabled}>
+      <button
+        onClick={handleSend}
+        disabled={disabled}
+        className={classes.button}
+      >
         Send
       </button>
     </div>

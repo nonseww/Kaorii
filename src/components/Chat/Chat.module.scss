@@ -1,5 +1,40 @@
 .mainWindow {
-  width: 300px;
-  height: 550px;
+  width: 450px;
+  height: 600px;
   background-color: #242424;
+  padding: 10px 15px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 23px;
+  text-align: center;
+}
+
+.chat {
+  height: 70%;
+  overflow-y: auto;
+  padding-right: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.messageWrapper {
+  margin-bottom: 12px;
+  width: 100%;
+  display: flex;
+}
+
+.userMessage {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.aiMessage {
+  justify-content: flex-start;
+  text-align: left;
 }

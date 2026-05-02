@@ -13,7 +13,7 @@ fn get_model_path() -> Result<String, String> {
 
 #[tauri::command]
 fn resize_window(window: tauri::WebviewWindow, expanded: bool){
-    let (w, h) = if expanded { (350.0, 500.0 )} else { (60.0, 60.0) };
+    let (w, h) = if expanded { (450.0, 600.0 )} else { (60.0, 60.0) };
     let _ = window.set_size(tauri::LogicalSize::new(w, h));
 
     #[cfg(target_os = "linux")]
