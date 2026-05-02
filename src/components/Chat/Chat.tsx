@@ -5,6 +5,8 @@ import classes from "./Chat.module.scss";
 import { useDragWindow } from "../../hooks/useDragWindow";
 import Thinking from "../../assets/thinking-light.svg";
 import { useScrollToBottom } from "../../hooks/useScrollToBottom";
+import { Modal } from "../../ui/Modal";
+import { useState } from "react";
 
 interface ChatProps {
   isServerReady: boolean;
@@ -13,6 +15,7 @@ interface ChatProps {
   error: string;
   sendMessage: (text: string) => void;
   onClick: () => void;
+  onClear: () => void;
 }
 
 export const Chat = ({
@@ -22,38 +25,52 @@ export const Chat = ({
   error,
   sendMessage,
   onClick,
+  onClear,
 }: ChatProps) => {
   const { handleMouseDown, handleMouseMove, handleMouseUp } = useDragWindow();
 
   const { ref } = useScrollToBottom(messages);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div
-      onDoubleClick={onClick}
-      className={classes.mainWindow}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
-      <h1 className={classes.title}>LLM_Helper is here :)</h1>
-      <div className={classes.chat} ref={ref}>
-        {messages
-          .filter((m) => m.role !== "system")
-          .map((m, i) => (
-            <div
-              key={i}
-              className={`${classes.messageWrapper} ${m.role === "user" ? classes.userMessage : classes.aiMessage}`}
-            >
-              <MessageContent content={m.content} />
-            </div>
-          ))}
-        {isLoading && <img src={Thinking} className={classes.thinking} />}
+    <>
+      <div
+        onDoubleClick={onClick}
+        className={classes.mainWindow}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        <h1 className={classes.title}>LLM_Helper is here :)</h1>
+        <div className={classes.chat} ref={ref}>
+          {messages
+            .filter((m) => m.role !== "system")
+            .map((m, i) => (
+              <div
+                key={i}
+                className={`${classes.messageWrapper} ${m.role === "user" ? classes.userMessage : classes.aiMessage}`}
+              >
+                <MessageContent content={m.content} />
+              </div>
+            ))}
+          {isLoading && <img src={Thinking} className={classes.thinking} />}
+        </div>
+        <ChatInput
+          onSend={(text) => sendMessage(text)}
+          disabled={isLoading || !isServerReady}
+          onClearClicked={() => setIsModalOpen(true)}
+        />
+        {error && <div>{error}</div>}
       </div>
-      <ChatInput
-        onSend={(text) => sendMessage(text)}
-        disabled={isLoading || !isServerReady}
-      />
-      {error && <div>{error}</div>}
-    </div>
+      {isModalOpen && (
+        <Modal
+          title="Confirm"
+          text="Are you sure that you want to clear this chat?"
+          onClose={() => setIsModalOpen(false)}
+          onCancel={() => setIsModalOpen(false)}
+          onSubmit={onClear}
+        />
+      )}
+    </>
   );
 };

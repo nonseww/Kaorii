@@ -1,0 +1,49 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba($color: #000000, $alpha: 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  width: 70%;
+  background-color: #1b1b1b;
+  box-shadow: 0 10px 25px rgba($color: #000000, $alpha: 0.5);
+  animation: scaleIn 0.2s ease-out;
+  border-radius: 12px;
+  border: 1px solid #444;
+  padding: 20px;
+}
+
+.title {
+  margin: 0;
+  text-align: center;
+}
+
+.text {
+  margin-block: 30px;
+}
+
+.buttonsContainer {
+  display: flex;
+  gap: 10px;
+  justify-content: end;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
