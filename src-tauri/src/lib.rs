@@ -1,3 +1,8 @@
+use tauri::Manager;
+use tauri::LogicalSize;
+
+#[cfg(target_os = "linux")]
+
 #[tauri::command]
 fn get_model_path() -> Result<String, String> {
     let current_dir = std::env::current_dir().map_err(|e| e.to_string())?;
@@ -6,12 +11,45 @@ fn get_model_path() -> Result<String, String> {
     Ok(absolute_path.to_string_lossy().to_string())
 }
 
+#[tauri::command]
+fn resize_window(window: tauri::WebviewWindow, expanded: bool){
+    let (w, h) = if expanded { (350.0, 500.0 )} else { (60.0, 60.0) };
+    let _ = window.set_size(tauri::LogicalSize::new(w, h));
+
+    #[cfg(target_os = "linux")]
+    {
+        if let Ok(gtk_window) = window.gtk_window() {
+            use gtk::prelude::*;
+            gtk_window.set_size_request(w as i32, h as i32);
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![get_model_path])
+        .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![get_model_path, resize_window])
+        .setup(|app| {
+            if let Some(window) = app.get_webview_window("main") {
+                let size = LogicalSize::new(70.0, 70.0);
+                let _ = window.set_size(size);
+                let _ = window.set_min_size(Some(size));
+                let _ = window.set_max_size(Some(size));
+                let _ = window.set_resizable(false);
+
+                #[cfg(target_os = "linux")]
+                {         
+                    if let Ok(gtk_window) = window.gtk_window() {
+                        use gtk::prelude::*;
+                        gtk_window.set_size_request(60, 60);
+                        gtk_window.resize(60, 60);
+                    }
+                }
+            }
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

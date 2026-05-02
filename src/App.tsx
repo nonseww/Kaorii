@@ -2,13 +2,9 @@ import { useState, useEffect } from "react";
 import { Command } from "@tauri-apps/plugin-shell";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
-import { MessageContent } from "./MessageContent";
-import { ChatInput } from "./ChatInput";
-
-type Message = {
-  role: "system" | "user" | "assistant";
-  content: string;
-};
+import type { Message } from "./types/Message";
+import { Chat } from "./components/Chat";
+import { SmallWidget } from "./components/SmallWidget";
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([
@@ -21,6 +17,17 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [isServerReady, setIsServerReady] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  const toggleWindow = async () => {
+    const nextState = !isExpanded;
+    try {
+      await invoke("resize_window", { expanded: nextState });
+      setIsExpanded(nextState);
+    } catch (error) {
+      console.error("Resize error: ", error);
+    }
+  };
 
   const checkServerHealth = async () => {
     try {
@@ -103,28 +110,20 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <h1>LLM_Helper!</h1>
-      <h2>{isServerReady ? "Server is ready!" : "Wait..."}</h2>
-      <div>
-        {messages
-          .filter((m) => m.role !== "system")
-          .map((m, i) => (
-            <div
-              key={i}
-              style={{
-                textAlign: m.role === "user" ? "right" : "left",
-                marginBottom: "10px",
-              }}
-            >
-              <MessageContent content={m.content} />
-            </div>
-          ))}
-        {isLoading && <p>Thinking...</p>}
-      </div>
-      <ChatInput onSend={(text) => sendMessage(text)} disabled={isLoading} />
-      {error && <div>{error}</div>}
-    </div>
+    <>
+      {isExpanded ? (
+        <Chat
+          isServerReady={isServerReady}
+          messages={messages}
+          isLoading={isLoading}
+          error={error}
+          sendMessage={sendMessage}
+          onClick={toggleWindow}
+        />
+      ) : (
+        <SmallWidget onClick={toggleWindow} />
+      )}
+    </>
   );
 }
 

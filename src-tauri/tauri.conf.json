@@ -13,8 +13,17 @@
     "windows": [
       {
         "title": "llm_helper",
-        "width": 800,
-        "height": 600
+        "width": 70,
+        "height": 70,
+        "minWidth": 70,
+        "minHeight": 70,
+        "maxWidth": 70,
+        "maxHeight": 70,
+        "shadow": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "transparent": true,
+        "resizable": false
       }
     ],
     "security": {
