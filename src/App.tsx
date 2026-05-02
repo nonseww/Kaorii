@@ -6,6 +6,7 @@ import { SmallWidget } from "./components/SmallWidget";
 import { useLlamaServer } from "./hooks/useLlamaServer";
 import { sendRequest } from "./services/sendRequest";
 import { useToggleWindow } from "./hooks/useToggleWindow";
+import { useShortcutToggle } from "./hooks/useShortcutToggle";
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([
@@ -20,6 +21,7 @@ function App() {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const isServerReady = useLlamaServer();
   const toggleWindow = useToggleWindow({ isExpanded, setIsExpanded });
+  useShortcutToggle({ toggleWindow });
 
   const sendMessage = async (text: string) => {
     await sendRequest({

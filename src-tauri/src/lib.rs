@@ -42,13 +42,14 @@ pub fn run() {
                 let _ = window.set_min_size(Some(size));
                 let _ = window.set_max_size(Some(size));
                 let _ = window.set_resizable(false);
+                let _ = window.set_focus();
 
                 #[cfg(target_os = "linux")]
                 {
                     if let Ok(gtk_window) = window.gtk_window() {
                         use gtk::prelude::*;
                         gtk_window.set_size_request(60, 60);
-                        gtk_window.resize(60, 60);
+                        //gtk_window.resize(60, 60);
                     }
                 }
             }
