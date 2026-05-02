@@ -1,8 +1,8 @@
 [package]
 name = "llm_helper"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "1.0.0"
+description = "A lightweight, privacy-focused desktop AI assistant for grammar checking, code explanation, and general assistance. "
+authors = ["nonseww"]
 edition = "2021"
 license = "MIT"
 
