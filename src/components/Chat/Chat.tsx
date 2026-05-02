@@ -3,6 +3,8 @@ import { MessageContent } from "../MessageContent";
 import { ChatInput } from "../ChatInput";
 import classes from "./Chat.module.scss";
 import { useDragWindow } from "../../hooks/useDragWindow";
+import Thinking from "../../assets/thinking-light.svg";
+import { useScrollToBottom } from "../../hooks/useScrollToBottom";
 
 interface ChatProps {
   isServerReady: boolean;
@@ -23,6 +25,8 @@ export const Chat = ({
 }: ChatProps) => {
   const { handleMouseDown, handleMouseMove, handleMouseUp } = useDragWindow();
 
+  const { ref } = useScrollToBottom(messages);
+
   return (
     <div
       onDoubleClick={onClick}
@@ -32,7 +36,7 @@ export const Chat = ({
       onMouseUp={handleMouseUp}
     >
       <h1 className={classes.title}>LLM_Helper is here :)</h1>
-      <div className={classes.chat}>
+      <div className={classes.chat} ref={ref}>
         {messages
           .filter((m) => m.role !== "system")
           .map((m, i) => (
@@ -43,7 +47,7 @@ export const Chat = ({
               <MessageContent content={m.content} />
             </div>
           ))}
-        {isLoading && <p>Thinking...</p>}
+        {isLoading && <img src={Thinking} className={classes.thinking} />}
       </div>
       <ChatInput
         onSend={(text) => sendMessage(text)}
