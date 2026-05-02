@@ -21,7 +21,17 @@
 
 .button {
   width: 40%;
-  margin-left: auto;
+}
+
+.secondButton {
+  background-color: #313131;
+  border: #202020 solid 1px;
+}
+
+.buttonsContainer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 @media (prefers-color-scheme: dark) {

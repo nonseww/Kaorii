@@ -119,6 +119,7 @@ function App() {
           error={error}
           sendMessage={sendMessage}
           onClick={toggleWindow}
+          onClear={() => setMessages([])}
         />
       ) : (
         <SmallWidget onClick={toggleWindow} />
