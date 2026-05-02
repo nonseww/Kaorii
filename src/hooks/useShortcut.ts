@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { setupShortcut } from "../utils/setupShortcut";
 
-export const useShortcutSummarize = (onTrigger: () => void) => {
+export const useShortcut = (onTrigger: () => void, shortcut: string) => {
   const onTriggerRef = useRef(onTrigger);
 
   useEffect(() => {
@@ -9,10 +9,8 @@ export const useShortcutSummarize = (onTrigger: () => void) => {
   }, [onTrigger]);
 
   useEffect(() => {
-    const shortcut = "Control+Alt+S";
-
     setupShortcut(shortcut, () => {
       onTriggerRef.current();
     });
-  }, []);
+  }, [shortcut]);
 };

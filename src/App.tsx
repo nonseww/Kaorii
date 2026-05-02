@@ -7,8 +7,8 @@ import { useLlamaServer } from "./hooks/useLlamaServer";
 import { sendRequest } from "./services/sendRequest";
 import { useToggleWindow } from "./hooks/useToggleWindow";
 import { useShortcutToggle } from "./hooks/useShortcutToggle";
-import { useShortcutSummarize } from "./hooks/useShortcutSummarize";
-import { useSummarize } from "./hooks/useSummarize";
+import { useShortcut } from "./hooks/useShortcut";
+import { useActionFromSelection } from "./hooks/useActionFromSelection";
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([
@@ -26,7 +26,7 @@ function App() {
 
   useShortcutToggle({ toggleWindow });
 
-  const handleSummarize = useSummarize({
+  const runAction = useActionFromSelection({
     messages,
     setMessages,
     setIsLoading,
@@ -35,7 +35,17 @@ function App() {
     toggleWindow,
   });
 
-  useShortcutSummarize(handleSummarize);
+  const handleSummarize = () =>
+    runAction((text) => `Сделай краткую выжимку этого текста: \n\n${text}`);
+
+  const handleTranslate = () =>
+    runAction(
+      (text) =>
+        `Переведи этот текст на русский язык, сохранив смысл и стиль: \n\n${text}`,
+    );
+
+  useShortcut(handleSummarize, "Control+Alt+S");
+  useShortcut(handleTranslate, "Control+Alt+T");
 
   const sendMessage = async (text: string) => {
     await sendRequest({
