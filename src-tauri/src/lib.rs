@@ -1,3 +1,8 @@
+use std::thread;
+use std::time::Duration;
+
+use enigo::Enigo;
+use enigo::KeyboardControllable;
 use tauri::LogicalSize;
 use tauri::Manager;
 
@@ -28,6 +33,16 @@ fn resize_window(window: tauri::WebviewWindow, expanded: bool) {
     }
 }
 
+#[tauri::command]
+fn copy_selected_text() {
+    let mut enigo = Enigo::new();
+    thread::sleep(Duration::from_millis(300));
+
+    enigo.key_down(enigo::Key::Control);
+    enigo.key_click(enigo::Key::Layout('c'));
+    enigo.key_up(enigo::Key::Control);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -35,7 +50,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_model_path, resize_window])
+        .invoke_handler(tauri::generate_handler![get_model_path, resize_window, copy_selected_text])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
                 let size = LogicalSize::new(70.0, 70.0);

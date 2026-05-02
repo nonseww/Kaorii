@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { sendRequest } from "../services/sendRequest";
 import type { Message } from "../types/Message";
 import { useClipboard } from "./useClipboard";
@@ -22,7 +23,15 @@ export const useSummarize = ({
   const { getClipboardText } = useClipboard();
 
   const handleSummarize = async () => {
+    await invoke("copy_selected_text");
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     const text = await getClipboardText();
+
+    if (!text) {
+      console.log("Clipboard is empty");
+    }
 
     if (!isExpanded) {
       await toggleWindow();
