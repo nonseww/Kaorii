@@ -3,10 +3,22 @@ import { Command } from "@tauri-apps/plugin-shell";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
+type Message = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
 function App() {
-  const [input, setInput] = useState<string>("");
-  const [messages, setMessages] = useState<any>([]);
-  const [modelPath, setModelPath] = useState<string>("");
+  const [userInput, setUserInput] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "system",
+      content:
+        "Ты - универсальный ИИ-помощник. Отвечай вежливо и развернуто. Говори на том языке, который пользователь использует больше всего",
+    },
+  ]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const [isServerReady, setIsServerReady] = useState<boolean>(false);
 
   const checkServerHealth = async () => {
@@ -18,14 +30,49 @@ function App() {
     }
   };
 
+  const sendMessage = async () => {
+    if (!userInput.trim()) return;
+
+    const newUserMessage: Message = { role: "user", content: userInput };
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
+    setUserInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8080/v1/chat/completions",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: updatedMessages,
+            temperature: 0.4,
+          }),
+        },
+      );
+
+      const data = await response.json();
+      const aiResponse: Message = {
+        role: "assistant",
+        content: data.choices[0].message.content,
+      };
+
+      setMessages((prev) => [...prev, aiResponse]);
+    } catch (err) {
+      setError(err as string);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const startLlamaServer = async () => {
-      const modelPath0 = await invoke<string>("get_model_path");
-      setModelPath(modelPath0);
+      const modelPath = await invoke<string>("get_model_path");
 
       const command = Command.sidecar("binaries/llama-server", [
         "-m",
-        modelPath0,
+        modelPath,
         "--port",
         "8080",
         "-ngl",
@@ -38,14 +85,12 @@ function App() {
       command.stderr.on("data", (line) => console.error("LLAMA ERROR:", line));
 
       command.on("close", (data) =>
-        console.log(`Сервер закрылся с кодом ${data.code}`),
+        console.log(`Server is closed with ${data.code}`),
       );
-      command.on("error", (error) =>
-        console.error(`Ошибка процесса: ${error}`),
-      );
+      command.on("error", (error) => console.error(`Process error: ${error}`));
 
       const child = await command.spawn();
-      console.log("Процесс запущен, PID:", child.pid);
+      console.log("PID:", child.pid);
     };
 
     startLlamaServer();
@@ -58,9 +103,36 @@ function App() {
   }, []);
 
   return (
-    <>
-      ready? : {isServerReady ? "yes" : "not yet"}, path: {modelPath}
-    </>
+    <div>
+      <h1>LLM_Helper!</h1>
+      <h2>{isServerReady ? "Server is ready!" : "Wait..."}</h2>
+      <div>
+        {messages
+          .filter((m) => m.role !== "system")
+          .map((m, i) => (
+            <div
+              key={i}
+              style={{
+                textAlign: m.role === "user" ? "right" : "left",
+                marginBottom: "10px",
+              }}
+            >
+              {m.content}
+            </div>
+          ))}
+        {isLoading && <p>Thinking...</p>}
+      </div>
+      <input
+        value={userInput}
+        onChange={(e) => setUserInput(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        placeholder="Ask..."
+      />
+      <button onClick={sendMessage} disabled={isLoading}>
+        Send
+      </button>
+      {error && <div>{error}</div>}
+    </div>
   );
 }
 
