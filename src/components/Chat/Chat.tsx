@@ -29,7 +29,7 @@ export const Chat = ({
 }: ChatProps) => {
   const { handleMouseDown, handleMouseMove, handleMouseUp } = useDragWindow();
 
-  const { ref } = useScrollToBottom(messages);
+  const { ref } = useScrollToBottom(messages, "auto");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (

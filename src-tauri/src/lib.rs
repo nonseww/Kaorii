@@ -31,7 +31,28 @@ fn resize_window(window: tauri::WebviewWindow, expanded: bool) {
             gtk_window.set_size_request(w as i32, h as i32);
         }
     }
+
+    if expanded {
+        let _ = window.unminimize();
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
 }
+
+#[tauri::command]
+fn focus_window(window: tauri::WebviewWindow) {
+    let _ = window.unminimize();
+    let _ = window.show();
+    let _ = window.set_focus();
+    #[cfg(target_os = "linux")]
+    {
+        if let Ok(gtk_window) = window.gtk_window() {
+            use gtk::prelude::*;
+            gtk_window.present();
+        }
+    }
+}
+
 
 #[tauri::command]
 fn copy_selected_text() {
@@ -74,7 +95,13 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_model_path, resize_window, copy_selected_text, move_app_to_side])
+        .invoke_handler(tauri::generate_handler![
+            get_model_path, 
+            resize_window, 
+            copy_selected_text, 
+            move_app_to_side, 
+            focus_window
+        ])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
                 let size = LogicalSize::new(70.0, 70.0);
@@ -82,16 +109,15 @@ pub fn run() {
                 let _ = window.set_min_size(Some(size));
                 let _ = window.set_max_size(Some(size));
                 let _ = window.set_resizable(false);
-                let _ = window.set_focus();
 
                 #[cfg(target_os = "linux")]
                 {
                     if let Ok(gtk_window) = window.gtk_window() {
                         use gtk::prelude::*;
                         gtk_window.set_size_request(60, 60);
-                        //gtk_window.resize(60, 60);
                     }
                 }
+                let _ = window.set_focus();
             }
             Ok(())
         })

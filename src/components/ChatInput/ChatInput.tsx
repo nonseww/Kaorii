@@ -22,7 +22,7 @@ export const ChatInput = ({ onSend, disabled, onClearClicked }: Props) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       textareaRef.current?.focus();
-    }, 100);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, []);
