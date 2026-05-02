@@ -9,6 +9,7 @@ import { useToggleWindow } from "./hooks/useToggleWindow";
 import { useShortcutToggle } from "./hooks/useShortcutToggle";
 import { useShortcut } from "./hooks/useShortcut";
 import { useActionFromSelection } from "./hooks/useActionFromSelection";
+import { invoke } from "@tauri-apps/api/core";
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([
@@ -47,9 +48,19 @@ function App() {
   const handleExplainCode = () =>
     runAction((text) => `Подробно объясни данный код: \n\n${text}`);
 
+  const handleMoveToSide = async (side: "left" | "right") => {
+    try {
+      await invoke("move_app_to_side", { side });
+    } catch (err) {
+      console.error("Failed to move window:", err);
+    }
+  };
+
   useShortcut(handleSummarize, "Control+Alt+S");
   useShortcut(handleTranslate, "Control+Alt+T");
   useShortcut(handleExplainCode, "Control+Alt+C");
+  useShortcut(() => handleMoveToSide("left"), "Control+Alt+ArrowLeft");
+  useShortcut(() => handleMoveToSide("right"), "Control+Alt+ArrowRight");
 
   const sendMessage = async (text: string) => {
     await sendRequest({

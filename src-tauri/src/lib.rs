@@ -43,6 +43,30 @@ fn copy_selected_text() {
     enigo.key_up(enigo::Key::Control);
 }
 
+#[tauri::command]
+fn move_app_to_side(window: tauri::WebviewWindow, side: String) -> Result<(), String> {
+    if let Ok(Some(monitor)) = window.current_monitor() {
+        let scale_factor = monitor.scale_factor();
+         let start_pos = window.outer_position().unwrap_or_default().to_logical::<f64>(scale_factor);
+
+        let work_area = monitor.work_area();
+        let window_size = window.outer_size().unwrap_or_default().to_logical::<f64>(scale_factor);
+
+        let work_area_logical_pos = work_area.position.to_logical::<f64>(scale_factor);
+        let work_area_logical_size = work_area.size.to_logical::<f64>(scale_factor);
+
+        let y = start_pos.y;
+        let x = if side == "left" {
+            work_area_logical_pos.x
+        } else {
+            work_area_logical_pos.x + work_area_logical_size.width - window_size.width
+        };
+
+        window.set_position(tauri::LogicalPosition::new(x, y)).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -50,7 +74,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_model_path, resize_window, copy_selected_text])
+        .invoke_handler(tauri::generate_handler![get_model_path, resize_window, copy_selected_text, move_app_to_side])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
                 let size = LogicalSize::new(70.0, 70.0);
