@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import classes from "./ChatInput.module.scss";
 import classNames from "classnames";
 
@@ -10,6 +10,8 @@ interface Props {
 
 export const ChatInput = ({ onSend, disabled, onClearClicked }: Props) => {
   const [text, setText] = useState<string>("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const handleSend = () => {
     if (text.trim()) {
       onSend(text);
@@ -17,14 +19,29 @@ export const ChatInput = ({ onSend, disabled, onClearClicked }: Props) => {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className={classes.container}>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
         placeholder="Ask..."
         className={classes.textarea}
+        ref={textareaRef}
+        autoFocus
       />
       <div className={classes.buttonsContainer}>
         <button
