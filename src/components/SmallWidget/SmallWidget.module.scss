@@ -1,11 +1,16 @@
 .logo {
   width: 60px !important;
   height: 60px !important;
-  cursor: pointer;
+  pointer-events: none;
   overflow: hidden;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #007bff;
+  object-fit: cover;
+}
+
+.container {
+  cursor: pointer;
 }
