@@ -12,7 +12,7 @@ export const SmallWidget = ({ onClick }: Props) => {
   return (
     <div
       className={classes.container}
-      onClick={onClick}
+      onDoubleClick={onClick}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

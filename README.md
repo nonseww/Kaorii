@@ -1,4 +1,4 @@
-# LLM Helper
+# Kaorii
 
 A lightweight, privacy-focused desktop AI assistant built with Tauri, React, and llama.cpp. This application lives in your system tray as a floating widget and provides instant access to a local Large Language Model (LLM) for grammar checking, code explanation, and general assistance.
 
@@ -54,10 +54,10 @@ npm run tauri dev
 
 ## Roadmap
 
-- [ ] Global hotkey support (e.g., Alt + Space to summon).
+- [x] Global hotkey support (e.g., Alt + Space to summon).
 - [ ] Automated model downloading and setup.
 - [ ] System tray integration.
-- [ ] "Clipboard mode": automatically process selected text.
+- [x] "Clipboard mode": automatically process selected text.
 
 ## License
 

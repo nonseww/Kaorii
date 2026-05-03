@@ -40,21 +40,6 @@ fn resize_window(window: tauri::WebviewWindow, expanded: bool) {
 }
 
 #[tauri::command]
-fn focus_window(window: tauri::WebviewWindow) {
-    let _ = window.unminimize();
-    let _ = window.show();
-    let _ = window.set_focus();
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(gtk_window) = window.gtk_window() {
-            use gtk::prelude::*;
-            gtk_window.present();
-        }
-    }
-}
-
-
-#[tauri::command]
 fn copy_selected_text() {
     let mut enigo = Enigo::new();
     thread::sleep(Duration::from_millis(300));
@@ -99,8 +84,7 @@ pub fn run() {
             get_model_path, 
             resize_window, 
             copy_selected_text, 
-            move_app_to_side, 
-            focus_window
+            move_app_to_side
         ])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {

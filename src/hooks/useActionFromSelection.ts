@@ -50,9 +50,9 @@ export const useActionFromSelection = (props: Props) => {
         text: finalPrompt,
         setError,
         setIsLoading,
+        role: "user",
+        temperature: 0.4,
       });
-
-      await invoke("focus_window");
     } catch (err) {
       console.log(err);
     }

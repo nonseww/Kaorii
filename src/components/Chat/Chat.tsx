@@ -2,11 +2,12 @@ import type { Message } from "../../types/Message";
 import { MessageContent } from "../MessageContent";
 import { ChatInput } from "../ChatInput";
 import classes from "./Chat.module.scss";
-import { useDragWindow } from "../../hooks/useDragWindow";
 import Thinking from "../../assets/thinking-light.svg";
 import { useScrollToBottom } from "../../hooks/useScrollToBottom";
 import { Modal } from "../../ui/Modal";
 import { useState } from "react";
+import { WindowBar } from "../WindowBar";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 interface ChatProps {
   isServerReady: boolean;
@@ -14,8 +15,8 @@ interface ChatProps {
   isLoading: boolean;
   error: string;
   sendMessage: (text: string) => void;
-  onClick: () => void;
   onClear: () => void;
+  toggleWindow: () => void;
 }
 
 export const Chat = ({
@@ -24,27 +25,29 @@ export const Chat = ({
   isLoading,
   error,
   sendMessage,
-  onClick,
   onClear,
+  toggleWindow,
 }: ChatProps) => {
-  const { handleMouseDown, handleMouseMove, handleMouseUp } = useDragWindow();
-
   const { ref } = useScrollToBottom(messages, "auto");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const appWindow = getCurrentWindow();
+
+  const handleClose = async () => {
+    await appWindow.close();
+  };
 
   return (
     <>
-      <div
-        onDoubleClick={onClick}
-        className={classes.mainWindow}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
-        <h1 className={classes.title}>LLM_Helper is here :)</h1>
+      <div className={classes.mainWindow}>
+        <WindowBar
+          onMinimazeClick={toggleWindow}
+          onCloseClick={handleClose}
+          onSettings={() => {}}
+          onRestartChat={() => setIsModalOpen(true)}
+        />
         <div className={classes.chat} ref={ref}>
           {messages
-            .filter((m) => m.role !== "system")
+            .filter((m) => m.role !== "system" && m.content)
             .map((m, i) => (
               <div
                 key={i}

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { setupShortcut } from "../utils/setupShortcut";
+import { shortcuts } from "../data/shortcuts";
 
 interface Props {
   toggleWindow: () => void;
@@ -13,8 +14,7 @@ export const useShortcutToggle = ({ toggleWindow }: Props) => {
   }, [toggleWindow]);
 
   useEffect(() => {
-    const shortcut = "Control+Alt+O";
-    setupShortcut(shortcut, () => {
+    setupShortcut(shortcuts.toggleWindow, () => {
       toggleRef.current();
     });
   }, []);
