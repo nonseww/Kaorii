@@ -51,8 +51,6 @@ export const useActionFromSelection = (props: Props) => {
         setError,
         setIsLoading,
       });
-
-      await invoke("focus_window");
     } catch (err) {
       console.log(err);
     }

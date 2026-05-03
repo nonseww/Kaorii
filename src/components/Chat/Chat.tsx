@@ -41,7 +41,7 @@ export const Chat = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       >
-        <h1 className={classes.title}>LLM_Helper is here :)</h1>
+        <h1 className={classes.title}>Kaorii is here :)</h1>
         <div className={classes.chat} ref={ref}>
           {messages
             .filter((m) => m.role !== "system")
