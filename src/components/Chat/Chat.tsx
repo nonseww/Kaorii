@@ -39,7 +39,12 @@ export const Chat = ({
   return (
     <>
       <div className={classes.mainWindow}>
-        <WindowBar onMinimazeClick={toggleWindow} onCloseClick={handleClose} />
+        <WindowBar
+          onMinimazeClick={toggleWindow}
+          onCloseClick={handleClose}
+          onSettings={() => {}}
+          onRestartChat={() => setIsModalOpen(true)}
+        />
         <div className={classes.chat} ref={ref}>
           {messages
             .filter((m) => m.role !== "system" && m.content)

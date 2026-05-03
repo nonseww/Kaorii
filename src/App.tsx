@@ -23,6 +23,7 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isCleared, setIsCleared] = useState<boolean>(true);
   const isServerReady = useLlamaServer();
   const toggleWindow = useToggleWindow({ isExpanded, setIsExpanded });
 
@@ -84,10 +85,11 @@ function App() {
   };
 
   useEffect(() => {
-    if (messages.length === 1 && isServerReady && !isLoading) {
+    if (messages.length === 1 && isServerReady && !isLoading && isCleared) {
       sendGreeting();
+      setIsCleared(false);
     }
-  }, [isServerReady]);
+  }, [isServerReady, isCleared]);
 
   return (
     <>
@@ -98,7 +100,15 @@ function App() {
           isLoading={isLoading}
           error={error}
           sendMessage={sendMessage}
-          onClear={() => setMessages([])}
+          onClear={() => {
+            setMessages([
+              {
+                role: "system",
+                content: prompts().systemInit,
+              },
+            ]);
+            setIsCleared(true);
+          }}
           toggleWindow={toggleWindow}
         />
       ) : (

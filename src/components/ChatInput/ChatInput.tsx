@@ -48,6 +48,7 @@ export const ChatInput = ({ onSend, disabled }: Props) => {
         onClick={handleSend}
         disabled={disabled}
         className={classes.sendButton}
+        title="Send"
       >
         <Icon src={Chevron} />
       </button>
