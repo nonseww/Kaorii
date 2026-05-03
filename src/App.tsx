@@ -32,18 +32,10 @@ function App() {
   useShortcut(() => handleMoveToSide("right"), shortcuts.moveToSideRight);
 
   useEffect(() => {
-    console.log(
-      "useeffect",
-      store.messages,
-      store.isServerReady,
-      store.isLoading,
-      store.isCleared,
-    );
     if (
-      (store.messages.length === 1 &&
-        store.isServerReady &&
-        !store.isLoading) ||
-      store.isCleared
+      store.messages.length === 1 &&
+      store.isServerReady &&
+      !store.isLoading
     ) {
       sendGreeting();
       store.setIsCleared(false);
