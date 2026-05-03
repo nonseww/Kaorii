@@ -10,13 +10,14 @@ import { useShortcutToggle } from "./hooks/useShortcutToggle";
 import { useShortcut } from "./hooks/useShortcut";
 import { useActionFromSelection } from "./hooks/useActionFromSelection";
 import { invoke } from "@tauri-apps/api/core";
+import { prompts } from "./data/prompts";
+import { shortcuts } from "./data/shortcuts";
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
-      content:
-        "Ты - универсальный ИИ-помощник. Тебя зовут Kaorii. Отвечай вежливо и развернуто. Говори на том языке, который пользователь использует больше всего",
+      content: prompts().systemInit,
     },
   ]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,17 +37,12 @@ function App() {
     toggleWindow,
   });
 
-  const handleSummarize = () =>
-    runAction((text) => `Сделай краткую выжимку этого текста: \n\n${text}`);
+  const handleSummarize = () => runAction((text) => prompts(text).summarize);
 
-  const handleTranslate = () =>
-    runAction(
-      (text) =>
-        `Переведи этот текст на русский язык, сохранив смысл и стиль: \n\n${text}`,
-    );
+  const handleTranslate = () => runAction((text) => prompts(text).translate);
 
   const handleExplainCode = () =>
-    runAction((text) => `Подробно объясни данный код: \n\n${text}`);
+    runAction((text) => prompts(text).explainCode);
 
   const handleMoveToSide = async (side: "left" | "right") => {
     try {
@@ -56,11 +52,11 @@ function App() {
     }
   };
 
-  useShortcut(handleSummarize, "Control+Alt+S");
-  useShortcut(handleTranslate, "Control+Alt+T");
-  useShortcut(handleExplainCode, "Control+Alt+C");
-  useShortcut(() => handleMoveToSide("left"), "Control+Alt+ArrowLeft");
-  useShortcut(() => handleMoveToSide("right"), "Control+Alt+ArrowRight");
+  useShortcut(handleSummarize, shortcuts.summarize);
+  useShortcut(handleTranslate, shortcuts.translate);
+  useShortcut(handleExplainCode, shortcuts.explainCode);
+  useShortcut(() => handleMoveToSide("left"), shortcuts.moveToSideLeft);
+  useShortcut(() => handleMoveToSide("right"), shortcuts.moveToSideRight);
 
   const sendMessage = async (text: string) => {
     await sendRequest({
@@ -78,7 +74,7 @@ function App() {
     await sendRequest({
       messages,
       setMessages,
-      text: "Прими роль ассистента и поприветствуй пользователя коротко и дружелюбно. Назови своё имя - Kaorii",
+      text: prompts().greeting,
       setError,
       setIsLoading,
       role: "user",

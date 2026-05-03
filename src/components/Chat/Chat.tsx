@@ -2,7 +2,6 @@ import type { Message } from "../../types/Message";
 import { MessageContent } from "../MessageContent";
 import { ChatInput } from "../ChatInput";
 import classes from "./Chat.module.scss";
-import { useDragWindow } from "../../hooks/useDragWindow";
 import Thinking from "../../assets/thinking-light.svg";
 import { useScrollToBottom } from "../../hooks/useScrollToBottom";
 import { Modal } from "../../ui/Modal";
@@ -27,20 +26,12 @@ export const Chat = ({
   onClick,
   onClear,
 }: ChatProps) => {
-  const { handleMouseDown, handleMouseMove, handleMouseUp } = useDragWindow();
-
   const { ref } = useScrollToBottom(messages, "auto");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      <div
-        onDoubleClick={onClick}
-        className={classes.mainWindow}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
+      <div onDoubleClick={onClick} className={classes.mainWindow}>
         <div className={classes.chat} ref={ref}>
           {messages
             .filter((m) => m.role !== "system" && m.content)

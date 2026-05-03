@@ -9,7 +9,7 @@ interface Props {
   onClearClicked: () => void;
 }
 
-export const ChatInput = ({ onSend, disabled, onClearClicked }: Props) => {
+export const ChatInput = ({ onSend, disabled }: Props) => {
   const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
