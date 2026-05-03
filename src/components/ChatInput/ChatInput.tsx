@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import classes from "./ChatInput.module.scss";
-import classNames from "classnames";
+import Chevron from "../../assets/Chevron.svg";
+import { Icon } from "../../ui/Icon";
 
 interface Props {
   onSend: (text: string) => void;
@@ -43,22 +44,13 @@ export const ChatInput = ({ onSend, disabled, onClearClicked }: Props) => {
         ref={textareaRef}
         autoFocus
       />
-      <div className={classes.buttonsContainer}>
-        <button
-          onClick={onClearClicked}
-          disabled={disabled}
-          className={classNames(classes.button, classes.secondButton)}
-        >
-          Clear
-        </button>
-        <button
-          onClick={handleSend}
-          disabled={disabled}
-          className={classes.button}
-        >
-          Send
-        </button>
-      </div>
+      <button
+        onClick={handleSend}
+        disabled={disabled}
+        className={classes.sendButton}
+      >
+        <Icon src={Chevron} />
+      </button>
     </div>
   );
 };

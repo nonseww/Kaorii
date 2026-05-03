@@ -6,6 +6,9 @@ interface Props {
   text: string;
   setError: (err: string) => void;
   setIsLoading: (state: boolean) => void;
+  role: "user" | "assistant" | "system";
+  temperature: number;
+  saveToHistory?: boolean;
 }
 
 export const sendRequest = async ({
@@ -14,12 +17,19 @@ export const sendRequest = async ({
   text,
   setError,
   setIsLoading,
+  role,
+  temperature,
+  saveToHistory = true,
 }: Props) => {
   if (!text.trim()) return;
 
-  const newUserMessage: Message = { role: "user", content: text };
-  const updatedMessages = [...messages, newUserMessage];
-  setMessages(updatedMessages);
+  const newUserMessage: Message = { role: role, content: text };
+  const apiMessages = [...messages, newUserMessage];
+  if (saveToHistory) {
+    setMessages(apiMessages);
+  } else {
+    setMessages([...messages, { role: "user", content: "" }]);
+  }
   setIsLoading(true);
   setError("");
 
@@ -28,8 +38,8 @@ export const sendRequest = async ({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        messages: updatedMessages,
-        temperature: 0.4,
+        messages: apiMessages,
+        temperature: temperature,
       }),
     });
 
@@ -39,9 +49,13 @@ export const sendRequest = async ({
       content: data.choices[0].message.content,
     };
 
-    setMessages([...updatedMessages, aiResponse]);
+    setMessages(
+      saveToHistory
+        ? [...apiMessages, aiResponse]
+        : [...messages, { role: "user", content: "" }, aiResponse],
+    );
   } catch (err) {
-    setError(err as string);
+    setError(err instanceof Error ? err.message : String(err));
   } finally {
     setIsLoading(false);
   }

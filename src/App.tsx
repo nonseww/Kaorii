@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import type { Message } from "./types/Message";
 import { Chat } from "./components/Chat";
@@ -69,8 +69,29 @@ function App() {
       text,
       setError,
       setIsLoading,
+      role: "user",
+      temperature: 0.4,
     });
   };
+
+  const sendGreeting = async () => {
+    await sendRequest({
+      messages,
+      setMessages,
+      text: "Прими роль ассистента и поприветствуй пользователя коротко и дружелюбно. Назови своё имя - Kaorii",
+      setError,
+      setIsLoading,
+      role: "user",
+      temperature: 0.7,
+      saveToHistory: false,
+    });
+  };
+
+  useEffect(() => {
+    if (messages.length === 1 && isServerReady && !isLoading) {
+      sendGreeting();
+    }
+  }, [isServerReady]);
 
   return (
     <>

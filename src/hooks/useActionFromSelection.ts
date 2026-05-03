@@ -50,6 +50,8 @@ export const useActionFromSelection = (props: Props) => {
         text: finalPrompt,
         setError,
         setIsLoading,
+        role: "user",
+        temperature: 0.4,
       });
     } catch (err) {
       console.log(err);
