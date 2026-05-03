@@ -17,14 +17,14 @@ Kaorii is designed to be used without leaving your current workflow.
 
 ---
 
-| Shortcut       | Action                                                       |
-| -------------- | ------------------------------------------------------------ |
-| Ctrl + Alt + O | Toggle Window — Expand to Chat or collapse to Widget         |
-| Ctrl + Alt + S | Summarize — Get a summary of the currently selected text     |
-| Ctrl + Alt + T | Translate — Translate selected text to Russian               |
-| Ctrl + Alt + C | Explain Code — Detailed explanation of the highlighted code  |
-| Ctrl + Alt + ← | Move Left — Snap the widget to the left side of the screen   |
-| Ctrl + Alt + → | Move Right — Snap the widget to the right side of the screen |
+| Shortcut         | Action                                                           |
+| ---------------- | ---------------------------------------------------------------- |
+| `Ctrl + Alt + O` | **Toggle Window** — Expand to Chat or collapse to Widget         |
+| `Ctrl + Alt + S` | **Summarize** — Get a summary of the currently selected text     |
+| `Ctrl + Alt + T` | **Translate** — Translate selected text to Russian               |
+| `Ctrl + Alt + C` | **Explain Code** — Detailed explanation of the highlighted code  |
+| `Ctrl + Alt + ←` | **Move Left** — Snap the widget to the left side of the screen   |
+| `Ctrl + Alt + →` | **Move Right** — Snap the widget to the right side of the screen |
 
 ## Tech Stack
 
