@@ -1,27 +1,15 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Message } from "../types/Message";
 import { useClipboard } from "./useClipboard";
 import { sendRequest } from "../services/sendRequest";
+import { useAppStore } from "../store/useAppStore";
 
 interface Props {
-  messages: Message[];
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-  setIsLoading: (state: boolean) => void;
-  setError: (err: string) => void;
-  isExpanded: boolean;
   toggleWindow: () => Promise<void>;
 }
 
-export const useActionFromSelection = (props: Props) => {
-  const {
-    messages,
-    setMessages,
-    setIsLoading,
-    setError,
-    isExpanded,
-    toggleWindow,
-  } = props;
+export const useActionFromSelection = ({ toggleWindow }: Props) => {
   const { getClipboardText } = useClipboard();
+  const isExpanded = useAppStore((s) => s.isExpanded);
 
   const runAction = async (
     promptGenerator: (selectedText: string) => string,
@@ -45,11 +33,7 @@ export const useActionFromSelection = (props: Props) => {
       const finalPrompt = promptGenerator(text);
 
       await sendRequest({
-        messages,
-        setMessages,
         text: finalPrompt,
-        setError,
-        setIsLoading,
         role: "user",
         temperature: 0.4,
       });

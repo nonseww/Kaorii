@@ -5,14 +5,43 @@ use enigo::Enigo;
 use enigo::KeyboardControllable;
 use tauri::LogicalSize;
 use tauri::Manager;
+use std::fs;
+use serde::{Serialize, Deserialize};
 
-#[cfg(target_os = "linux")]
+#[derive(Serialize, Deserialize, Default)]
+struct AppConfig {
+    model_path: Option<String>,
+}
+
+fn get_config_path(app_handle: &tauri::AppHandle) -> std::path::PathBuf {
+    app_handle.path().app_config_dir().unwrap().join("config.json")
+}
+
 #[tauri::command]
-fn get_model_path() -> Result<String, String> {
-    let current_dir = std::env::current_dir().map_err(|e| e.to_string())?;
-    let path = current_dir.join("../models/gemma-2-2b-it-Q4_K_M.gguf");
-    let absolute_path = std::fs::canonicalize(&path).unwrap_or(path);
-    Ok(absolute_path.to_string_lossy().to_string())
+fn save_model_path(app_handle: tauri::AppHandle, path: String) -> Result<(), String> {
+    let config_path = get_config_path(&app_handle);
+    let config_dir = config_path.parent().unwrap();
+
+    fs::create_dir_all(config_dir).map_err(|e| e.to_string())?;
+    let config = AppConfig { model_path: Some(path) };
+    let json = serde_json::to_string(&config).map_err(|e| e.to_string())?;
+    fs::write(config_path, json).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn get_model_path(app_handle: tauri::AppHandle) -> Result<String, String> {
+    let config_path = get_config_path(&app_handle);
+    if config_path.exists() {
+        let json = fs::read_to_string(config_path).map_err(|e| e.to_string())?;
+        let config: AppConfig = serde_json::from_str(&json).map_err(|e| e.to_string())?;
+        if let Some(path) = config.model_path {
+            if std::path::Path::new(&path).exists() {
+                return Ok(path);
+            }
+        }
+    }
+    Err("NOT_FOUND".to_string())
 }
 
 #[tauri::command]
@@ -76,12 +105,14 @@ fn move_app_to_side(window: tauri::WebviewWindow, side: String) -> Result<(), St
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             get_model_path, 
+            save_model_path,
             resize_window, 
             copy_selected_text, 
             move_app_to_side

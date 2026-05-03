@@ -1,14 +1,22 @@
-import { Command } from "@tauri-apps/plugin-shell";
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { Command, Child } from "@tauri-apps/plugin-shell";
+import { useEffect, useRef } from "react";
 import { checkServerHealth } from "../services/checkServerHealth";
+import { useAppStore } from "../store/useAppStore";
 
 export const useLlamaServer = () => {
-  const [isServerReady, setIsServerReady] = useState(false);
+  const modelPath = useAppStore((s) => s.modelPath);
+  const setIsServerReady = useAppStore((s) => s.setIsServerReady);
+  const childRef = useRef<Child | null>(null);
 
   useEffect(() => {
+    if (!modelPath) return;
+
     const startLlamaServer = async () => {
-      const modelPath = await invoke<string>("get_model_path");
+      if (childRef.current) {
+        await childRef.current.kill();
+        childRef.current = null;
+        setIsServerReady(false);
+      }
 
       const command = Command.sidecar("binaries/llama-server", [
         "-m",
@@ -24,13 +32,8 @@ export const useLlamaServer = () => {
       command.stdout.on("data", (line) => console.log("LLAMA LOG:", line));
       command.stderr.on("data", (line) => console.error("LLAMA ERROR:", line));
 
-      command.on("close", (data) =>
-        console.log(`Server is closed with ${data.code}`),
-      );
-      command.on("error", (error) => console.error(`Process error: ${error}`));
-
       const child = await command.spawn();
-      console.log("PID:", child.pid);
+      childRef.current = child;
     };
 
     startLlamaServer();
@@ -39,8 +42,11 @@ export const useLlamaServer = () => {
       const isHealthy = await checkServerHealth();
       setIsServerReady(isHealthy);
     }, 2000);
-    return () => clearInterval(healthCheckInterval);
-  }, []);
-
-  return isServerReady;
+    return () => {
+      clearInterval(healthCheckInterval);
+      if (childRef.current) {
+        childRef.current.kill();
+      }
+    };
+  }, [modelPath, setIsServerReady]);
 };

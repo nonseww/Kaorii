@@ -24,6 +24,7 @@
     "global-shortcut:allow-register",
     "global-shortcut:allow-unregister",
     "clipboard-manager:allow-read-text",
-    "clipboard-manager:default"
+    "clipboard-manager:default",
+    "dialog:allow-open"
   ]
 }

@@ -43,6 +43,7 @@ export const ChatInput = ({ onSend, disabled }: Props) => {
         className={classes.textarea}
         ref={textareaRef}
         autoFocus
+        disabled={disabled}
       />
       <button
         onClick={handleSend}
