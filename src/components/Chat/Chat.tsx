@@ -6,6 +6,8 @@ import Thinking from "../../assets/thinking-light.svg";
 import { useScrollToBottom } from "../../hooks/useScrollToBottom";
 import { Modal } from "../../ui/Modal";
 import { useState } from "react";
+import { WindowBar } from "../WindowBar";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 interface ChatProps {
   isServerReady: boolean;
@@ -13,8 +15,8 @@ interface ChatProps {
   isLoading: boolean;
   error: string;
   sendMessage: (text: string) => void;
-  onClick: () => void;
   onClear: () => void;
+  toggleWindow: () => void;
 }
 
 export const Chat = ({
@@ -23,15 +25,21 @@ export const Chat = ({
   isLoading,
   error,
   sendMessage,
-  onClick,
   onClear,
+  toggleWindow,
 }: ChatProps) => {
   const { ref } = useScrollToBottom(messages, "auto");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const appWindow = getCurrentWindow();
+
+  const handleClose = async () => {
+    await appWindow.close();
+  };
 
   return (
     <>
-      <div onDoubleClick={onClick} className={classes.mainWindow}>
+      <div className={classes.mainWindow}>
+        <WindowBar onMinimazeClick={toggleWindow} onCloseClick={handleClose} />
         <div className={classes.chat} ref={ref}>
           {messages
             .filter((m) => m.role !== "system" && m.content)

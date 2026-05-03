@@ -1,0 +1,17 @@
+.windowbar {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  justify-content: end;
+  gap: 15px;
+}
+
+button {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+
+  &:hover {
+    outline: none;
+  }
+}
