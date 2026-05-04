@@ -13,11 +13,10 @@ import { useAppActions } from "../../hooks/useAppActions";
 import { Loader } from "../../ui/Loader";
 
 interface ChatProps {
-  handleSelectModel: () => Promise<boolean | void> | void;
   toggleWindow: () => void;
 }
 
-export const Chat = ({ handleSelectModel, toggleWindow }: ChatProps) => {
+export const Chat = ({ toggleWindow }: ChatProps) => {
   const store = useAppStore();
   const { ref } = useScrollToBottom("auto");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,7 +46,7 @@ export const Chat = ({ handleSelectModel, toggleWindow }: ChatProps) => {
           onRestartChat={() => setIsModalOpen(true)}
         />
         {isSettingsOpen ? (
-          <Settings handleSelectModel={handleSelectModel} />
+          <Settings />
         ) : (
           <>
             {!store.isServerReady ? (

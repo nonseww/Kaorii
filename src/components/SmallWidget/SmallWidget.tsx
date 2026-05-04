@@ -1,6 +1,8 @@
-import Logo from "../../assets/Logo.png";
+import DefaultLogo from "../../assets/Logo.png";
 import classes from "./SmallWidget.module.scss";
 import { useDragWindow } from "../../hooks/useDragWindow";
+import { useAppStore } from "../../store/useAppStore";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 interface Props {
   onClick: () => void;
@@ -8,6 +10,8 @@ interface Props {
 
 export const SmallWidget = ({ onClick }: Props) => {
   const { handleMouseDown, handleMouseMove, handleMouseUp } = useDragWindow();
+  const iconPath = useAppStore((s) => s.iconPath);
+  const imgSrc = iconPath ? convertFileSrc(iconPath) : DefaultLogo;
 
   return (
     <div
@@ -17,7 +21,7 @@ export const SmallWidget = ({ onClick }: Props) => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      <img src={Logo} className={classes.logo} />
+      <img src={imgSrc} className={classes.logo} />
     </div>
   );
 };

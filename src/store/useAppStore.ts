@@ -4,9 +4,11 @@ import { prompts } from "../data/prompts";
 
 interface AppState {
   modelPath: string | null;
+  iconPath: string | null;
   isServerReady: boolean;
   isCheckingModel: boolean;
   setModelPath: (path: string | null) => void;
+  setIconPath: (path: string | null) => void;
   setIsServerReady: (state: boolean) => void;
   setIsCheckingModel: (state: boolean) => void;
 
@@ -26,6 +28,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   modelPath: null,
+  iconPath: null,
   isServerReady: false,
   isCheckingModel: true,
   messages: [
@@ -40,6 +43,7 @@ export const useAppStore = create<AppState>((set) => ({
   isCleared: true,
 
   setModelPath: (path) => set({ modelPath: path }),
+  setIconPath: (path) => set({ iconPath: path }),
   setIsServerReady: (state) => set({ isServerReady: state }),
   addMessage: (m) => set((state) => ({ messages: [...state.messages, m] })),
   setMessages: (ms) => set({ messages: ms }),
