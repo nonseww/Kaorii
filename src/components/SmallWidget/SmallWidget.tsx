@@ -1,4 +1,4 @@
-import Logo from "../../assets/logo60x60.jpg";
+import Logo from "../../assets/Logo.png";
 import classes from "./SmallWidget.module.scss";
 import { useDragWindow } from "../../hooks/useDragWindow";
 

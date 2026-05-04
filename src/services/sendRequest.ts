@@ -1,37 +1,31 @@
+import { useAppStore } from "../store/useAppStore";
 import type { Message } from "../types/Message";
 
 interface Props {
-  messages: Message[];
-  setMessages: (data: Message[]) => void;
   text: string;
-  setError: (err: string) => void;
-  setIsLoading: (state: boolean) => void;
   role: "user" | "assistant" | "system";
   temperature: number;
   saveToHistory?: boolean;
 }
 
 export const sendRequest = async ({
-  messages,
-  setMessages,
   text,
-  setError,
-  setIsLoading,
   role,
   temperature,
   saveToHistory = true,
 }: Props) => {
   if (!text.trim()) return;
 
+  const store = useAppStore.getState();
   const newUserMessage: Message = { role: role, content: text };
-  const apiMessages = [...messages, newUserMessage];
+  const apiMessages = [...store.messages, newUserMessage];
   if (saveToHistory) {
-    setMessages(apiMessages);
+    store.setMessages(apiMessages);
   } else {
-    setMessages([...messages, { role: "user", content: "" }]);
+    store.setMessages([...store.messages, { role: "user", content: "" }]);
   }
-  setIsLoading(true);
-  setError("");
+  store.setIsLoading(true);
+  store.setError("");
 
   try {
     const response = await fetch("http://127.0.0.1:8080/v1/chat/completions", {
@@ -49,14 +43,14 @@ export const sendRequest = async ({
       content: data.choices[0].message.content,
     };
 
-    setMessages(
+    store.setMessages(
       saveToHistory
         ? [...apiMessages, aiResponse]
-        : [...messages, { role: "user", content: "" }, aiResponse],
+        : [...store.messages, { role: "user", content: "" }, aiResponse],
     );
   } catch (err) {
-    setError(err instanceof Error ? err.message : String(err));
+    store.setError(err instanceof Error ? err.message : String(err));
   } finally {
-    setIsLoading(false);
+    store.setIsLoading(false);
   }
 };

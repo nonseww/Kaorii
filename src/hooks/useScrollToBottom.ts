@@ -1,11 +1,9 @@
 import { useEffect, useRef } from "react";
-import { Message } from "../types/Message";
+import { useAppStore } from "../store/useAppStore";
 
-export const useScrollToBottom = (
-  messages: Message[],
-  type: "auto" | "smooth",
-) => {
+export const useScrollToBottom = (type: "auto" | "smooth") => {
   const ref = useRef<HTMLDivElement>(null);
+  const messages = useAppStore((s) => s.messages);
 
   const scrollToBottom = () => {
     if (ref.current) {

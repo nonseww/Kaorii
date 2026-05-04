@@ -1,40 +1,41 @@
-import type { Message } from "../../types/Message";
 import { MessageContent } from "../MessageContent";
 import { ChatInput } from "../ChatInput";
 import classes from "./Chat.module.scss";
 import Thinking from "../../assets/thinking-light.svg";
 import { useScrollToBottom } from "../../hooks/useScrollToBottom";
 import { Modal } from "../../ui/Modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WindowBar } from "../WindowBar";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { Settings } from "../Settings";
+import { useAppStore } from "../../store/useAppStore";
+import { useAppActions } from "../../hooks/useAppActions";
+import { Loader } from "../../ui/Loader";
 
 interface ChatProps {
-  isServerReady: boolean;
-  messages: Message[];
-  isLoading: boolean;
-  error: string;
-  sendMessage: (text: string) => void;
-  onClear: () => void;
+  handleSelectModel: () => Promise<boolean | void> | void;
   toggleWindow: () => void;
 }
 
-export const Chat = ({
-  isServerReady,
-  messages,
-  isLoading,
-  error,
-  sendMessage,
-  onClear,
-  toggleWindow,
-}: ChatProps) => {
-  const { ref } = useScrollToBottom(messages, "auto");
+export const Chat = ({ handleSelectModel, toggleWindow }: ChatProps) => {
+  const store = useAppStore();
+  const { ref } = useScrollToBottom("auto");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const appWindow = getCurrentWindow();
+  const { sendMessage } = useAppActions();
 
   const handleClose = async () => {
     await appWindow.close();
   };
+
+  useEffect(() => {
+    if (store.modelPath === null) {
+      store.setError("> Invalid model path. Please, choice Model in Tools");
+    } else {
+      store.setError("");
+    }
+  }, [store.modelPath]);
 
   return (
     <>
@@ -42,28 +43,42 @@ export const Chat = ({
         <WindowBar
           onMinimazeClick={toggleWindow}
           onCloseClick={handleClose}
-          onSettings={() => {}}
+          onSettings={() => setIsSettingsOpen((prev) => !prev)}
           onRestartChat={() => setIsModalOpen(true)}
         />
-        <div className={classes.chat} ref={ref}>
-          {messages
-            .filter((m) => m.role !== "system" && m.content)
-            .map((m, i) => (
-              <div
-                key={i}
-                className={`${classes.messageWrapper} ${m.role === "user" ? classes.userMessage : classes.aiMessage}`}
-              >
-                <MessageContent content={m.content} />
+        {isSettingsOpen ? (
+          <Settings handleSelectModel={handleSelectModel} />
+        ) : (
+          <>
+            {!store.isServerReady ? (
+              <Loader />
+            ) : (
+              <div className={classes.chat} ref={ref}>
+                {store.messages
+                  .filter((m) => m.role !== "system" && m.content)
+                  .map((m, i) => (
+                    <div
+                      key={i}
+                      className={`${classes.messageWrapper} ${m.role === "user" ? classes.userMessage : classes.aiMessage}`}
+                    >
+                      <MessageContent content={m.content} />
+                    </div>
+                  ))}
+                {store.isLoading && (
+                  <img src={Thinking} className={classes.thinking} />
+                )}
               </div>
-            ))}
-          {isLoading && <img src={Thinking} className={classes.thinking} />}
-        </div>
-        <ChatInput
-          onSend={(text) => sendMessage(text)}
-          disabled={isLoading || !isServerReady}
-          onClearClicked={() => setIsModalOpen(true)}
-        />
-        {error && <div>{error}</div>}
+            )}
+            {store.error && <div className={classes.error}>{store.error}</div>}
+            <ChatInput
+              onSend={(text) => sendMessage(text)}
+              disabled={
+                store.isLoading || !store.isServerReady || !!store.error
+              }
+              onClearClicked={() => setIsModalOpen(true)}
+            />
+          </>
+        )}
       </div>
       {isModalOpen && (
         <Modal
@@ -71,7 +86,7 @@ export const Chat = ({
           text="Are you sure that you want to clear this chat?"
           onClose={() => setIsModalOpen(false)}
           onCancel={() => setIsModalOpen(false)}
-          onSubmit={onClear}
+          onSubmit={store.clearMessages}
         />
       )}
     </>

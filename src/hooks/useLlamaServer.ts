@@ -1,14 +1,34 @@
-import { Command } from "@tauri-apps/plugin-shell";
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { Command, Child } from "@tauri-apps/plugin-shell";
+import { useEffect, useRef } from "react";
 import { checkServerHealth } from "../services/checkServerHealth";
+import { useAppStore } from "../store/useAppStore";
 
 export const useLlamaServer = () => {
-  const [isServerReady, setIsServerReady] = useState(false);
+  const modelPath = useAppStore((s) => s.modelPath);
+  const setIsServerReady = useAppStore((s) => s.setIsServerReady);
+  const childRef = useRef<Child | null>(null);
 
   useEffect(() => {
+    if (!modelPath) return;
+    let isMounted = true;
+
     const startLlamaServer = async () => {
-      const modelPath = await invoke<string>("get_model_path");
+      setIsServerReady(false);
+
+      if (childRef.current) {
+        console.log("Killing old server process...");
+        try {
+          await childRef.current.kill();
+          childRef.current = null;
+          await new Promise((r) => setTimeout(r, 2500));
+        } catch (e) {
+          console.error("Error while killing process:", e);
+        }
+      }
+
+      if (!isMounted) return;
+
+      console.log("Starting new server with:", modelPath);
 
       const command = Command.sidecar("binaries/llama-server", [
         "-m",
@@ -24,13 +44,16 @@ export const useLlamaServer = () => {
       command.stdout.on("data", (line) => console.log("LLAMA LOG:", line));
       command.stderr.on("data", (line) => console.error("LLAMA ERROR:", line));
 
-      command.on("close", (data) =>
-        console.log(`Server is closed with ${data.code}`),
-      );
-      command.on("error", (error) => console.error(`Process error: ${error}`));
-
-      const child = await command.spawn();
-      console.log("PID:", child.pid);
+      try {
+        const child = await command.spawn();
+        childRef.current = child;
+        console.log("New server spawned. PID:", child.pid);
+      } catch (e) {
+        console.error(
+          "Failed to spawn server. Port 8080 might still be blocked.",
+          e,
+        );
+      }
     };
 
     startLlamaServer();
@@ -39,8 +62,12 @@ export const useLlamaServer = () => {
       const isHealthy = await checkServerHealth();
       setIsServerReady(isHealthy);
     }, 2000);
-    return () => clearInterval(healthCheckInterval);
-  }, []);
-
-  return isServerReady;
+    return () => {
+      clearInterval(healthCheckInterval);
+      if (childRef.current) {
+        childRef.current.kill();
+        childRef.current = null;
+      }
+    };
+  }, [modelPath]);
 };

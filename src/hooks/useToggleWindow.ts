@@ -1,12 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback } from "react";
+import { useAppStore } from "../store/useAppStore";
 
-interface Props {
-  isExpanded: boolean;
-  setIsExpanded: (state: boolean) => void;
-}
+export const useToggleWindow = () => {
+  const isExpanded = useAppStore((s) => s.isExpanded);
+  const setIsExpanded = useAppStore((s) => s.setIsExpanded);
 
-export const useToggleWindow = ({ isExpanded, setIsExpanded }: Props) => {
   return useCallback(async () => {
     const nextState = !isExpanded;
     try {
