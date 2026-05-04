@@ -14,7 +14,7 @@ export const Settings = () => {
         <div className={classes.labelRow}>
           <span className={classes.label}>Local GGUF Model</span>
           <input
-            className={classes.modelText}
+            className={classes.pathText}
             defaultValue={store.modelPath ?? "No model selected..."}
           />
         </div>
@@ -25,7 +25,7 @@ export const Settings = () => {
 
       <div className={classes.field}>
         <div className={classes.labelRow}>
-          <span className={classes.label}>Local icon path</span>
+          <span className={classes.label}>Local Widget's Icon</span>
           <input
             className={classes.pathText}
             defaultValue={store.iconPath ?? "No icon selected..."}
