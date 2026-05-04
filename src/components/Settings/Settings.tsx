@@ -1,40 +1,70 @@
+import { useState } from "react";
 import { useConfig } from "../../hooks/useConfig";
 import { useAppStore } from "../../store/useAppStore";
+import { SettingField } from "../../ui/SettingField";
 import classes from "./Settings.module.scss";
 
 export const Settings = () => {
   const store = useAppStore();
   const { handleSelectModel, handleSelectIcon } = useConfig();
+  const [openrouterData, setOpenrouterData] = useState<{
+    modelName: string;
+    apiKey: string;
+  }>({
+    modelName: store.config.api_model ?? "",
+    apiKey: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOpenrouterData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   return (
     <div className={classes.settings}>
-      <div className={classes.field}>
-        <div className={classes.labelRow}>
-          <span className={classes.label}>Local GGUF Model</span>
+      <SettingField label="Local GGUF Model">
+        <>
           <input
-            className={classes.pathText}
             value={store.config.model_path ?? "No model selected..."}
             readOnly
           />
-        </div>
-        <button onClick={handleSelectModel} className={classes.chooseButton}>
-          Choose model
-        </button>
-      </div>
+          <button onClick={handleSelectModel}>Choose model</button>
+        </>
+      </SettingField>
 
-      <div className={classes.field}>
-        <div className={classes.labelRow}>
-          <span className={classes.label}>Local Widget's Icon</span>
+      <SettingField label="OpenRouter Model">
+        <>
           <input
-            className={classes.pathText}
+            value={openrouterData.modelName}
+            onChange={handleChange}
+            placeholder="Model name"
+            required
+            name="modelName"
+          />
+          <input
+            value={openrouterData.apiKey}
+            onChange={handleChange}
+            placeholder="API Key"
+            required
+            name="apiKey"
+          />
+          <div className={classes.buttonsContainer}>
+            <button onClick={() => {}}>Delete API Key</button>
+            <button type="submit" onClick={() => {}}>
+              Save
+            </button>
+          </div>
+        </>
+      </SettingField>
+
+      <SettingField label="Local Widget's Icon">
+        <>
+          <input
             value={store.config.icon_path ?? "No icon selected..."}
             readOnly
           />
-        </div>
-        <button onClick={handleSelectIcon} className={classes.chooseButton}>
-          Choose icon
-        </button>
-      </div>
+          <button onClick={handleSelectIcon}>Choose icon</button>
+        </>
+      </SettingField>
     </div>
   );
 };

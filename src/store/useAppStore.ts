@@ -32,6 +32,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   config: {
     model_path: null,
     icon_path: null,
+    api_model: null,
   },
   isServerReady: false,
   isCheckingModel: true,
