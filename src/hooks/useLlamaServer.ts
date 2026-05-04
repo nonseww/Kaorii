@@ -10,13 +10,25 @@ export const useLlamaServer = () => {
 
   useEffect(() => {
     if (!modelPath) return;
+    let isMounted = true;
 
     const startLlamaServer = async () => {
       if (childRef.current) {
-        await childRef.current.kill();
-        childRef.current = null;
-        setIsServerReady(false);
+        console.log("Killing old server process...");
+
+        try {
+          await childRef.current.kill();
+          childRef.current = null;
+          setIsServerReady(false);
+          await new Promise((r) => setTimeout(r, 3000));
+        } catch (e) {
+          console.error("Error while killing process:", e);
+        }
       }
+
+      if (!isMounted) return;
+
+      console.log("Starting new server with:", modelPath);
 
       const command = Command.sidecar("binaries/llama-server", [
         "-m",
@@ -32,8 +44,16 @@ export const useLlamaServer = () => {
       command.stdout.on("data", (line) => console.log("LLAMA LOG:", line));
       command.stderr.on("data", (line) => console.error("LLAMA ERROR:", line));
 
-      const child = await command.spawn();
-      childRef.current = child;
+      try {
+        const child = await command.spawn();
+        childRef.current = child;
+        console.log("New server spawned. PID:", child.pid);
+      } catch (e) {
+        console.error(
+          "Failed to spawn server. Port 8080 might still be blocked.",
+          e,
+        );
+      }
     };
 
     startLlamaServer();
@@ -46,7 +66,8 @@ export const useLlamaServer = () => {
       clearInterval(healthCheckInterval);
       if (childRef.current) {
         childRef.current.kill();
+        childRef.current = null;
       }
     };
-  }, [modelPath, setIsServerReady]);
+  }, [modelPath]);
 };

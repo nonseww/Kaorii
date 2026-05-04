@@ -25,8 +25,10 @@ export const useModelPath = () => {
 
     if (selectedModel && typeof selectedModel === "string") {
       try {
+        store.setIsServerReady(false);
         await invoke("save_model_path", { path: selectedModel });
         store.setModelPath(selectedModel);
+        store.clearMessages();
         return true;
       } catch (e) {
         console.error("Failed to save path", e);

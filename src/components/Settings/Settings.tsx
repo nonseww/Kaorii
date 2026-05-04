@@ -15,7 +15,7 @@ export const Settings = ({ handleSelectModel }: Props) => {
           <span className={classes.label}>Local GGUF Model</span>
           <input
             className={classes.modelPathText}
-            value={store.modelPath ?? "No model selected..."}
+            defaultValue={store.modelPath ?? "No model selected..."}
           />
         </div>
         <button
