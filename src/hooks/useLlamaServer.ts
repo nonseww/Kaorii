@@ -13,14 +13,14 @@ export const useLlamaServer = () => {
     let isMounted = true;
 
     const startLlamaServer = async () => {
+      setIsServerReady(false);
+
       if (childRef.current) {
         console.log("Killing old server process...");
-
         try {
           await childRef.current.kill();
           childRef.current = null;
-          setIsServerReady(false);
-          await new Promise((r) => setTimeout(r, 3000));
+          await new Promise((r) => setTimeout(r, 2500));
         } catch (e) {
           console.error("Error while killing process:", e);
         }

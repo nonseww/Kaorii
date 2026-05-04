@@ -34,7 +34,7 @@ export const ChatInput = ({ onSend, disabled }: Props) => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
+          if (e.key === "Enter" && !e.shiftKey && !disabled) {
             e.preventDefault();
             handleSend();
           }
@@ -43,7 +43,6 @@ export const ChatInput = ({ onSend, disabled }: Props) => {
         className={classes.textarea}
         ref={textareaRef}
         autoFocus
-        disabled={disabled}
       />
       <button
         onClick={handleSend}
