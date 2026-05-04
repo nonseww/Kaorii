@@ -4,12 +4,12 @@ import { checkServerHealth } from "../services/checkServerHealth";
 import { useAppStore } from "../store/useAppStore";
 
 export const useLlamaServer = () => {
-  const modelPath = useAppStore((s) => s.modelPath);
+  const config = useAppStore((s) => s.config);
   const setIsServerReady = useAppStore((s) => s.setIsServerReady);
   const childRef = useRef<Child | null>(null);
 
   useEffect(() => {
-    if (!modelPath) return;
+    if (!config.model_path) return;
     let isMounted = true;
 
     const startLlamaServer = async () => {
@@ -28,11 +28,11 @@ export const useLlamaServer = () => {
 
       if (!isMounted) return;
 
-      console.log("Starting new server with:", modelPath);
+      console.log("Starting new server with:", config.model_path);
 
       const command = Command.sidecar("binaries/llama-server", [
         "-m",
-        modelPath,
+        config.model_path ?? "",
         "--port",
         "8080",
         "-ngl",
@@ -69,5 +69,5 @@ export const useLlamaServer = () => {
         childRef.current = null;
       }
     };
-  }, [modelPath]);
+  }, [config.model_path]);
 };

@@ -1,14 +1,16 @@
 import { create } from "zustand";
 import type { Message } from "../types/Message";
 import { prompts } from "../data/prompts";
+import { AppConfig } from "../types/AppConfig";
+import { invoke } from "@tauri-apps/api/core";
 
 interface AppState {
-  modelPath: string | null;
-  iconPath: string | null;
+  config: AppConfig;
   isServerReady: boolean;
   isCheckingModel: boolean;
-  setModelPath: (path: string | null) => void;
-  setIconPath: (path: string | null) => void;
+  setConfig: (config: AppConfig) => void;
+  loadConfig: () => Promise<void>;
+  updateConfig: (partialConfig: Partial<AppConfig>) => void;
   setIsServerReady: (state: boolean) => void;
   setIsCheckingModel: (state: boolean) => void;
 
@@ -26,9 +28,11 @@ interface AppState {
   setIsCleared: (state: boolean) => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  modelPath: null,
-  iconPath: null,
+export const useAppStore = create<AppState>((set, get) => ({
+  config: {
+    model_path: null,
+    icon_path: null,
+  },
   isServerReady: false,
   isCheckingModel: true,
   messages: [
@@ -42,9 +46,29 @@ export const useAppStore = create<AppState>((set) => ({
   isExpanded: false,
   isCleared: true,
 
-  setModelPath: (path) => set({ modelPath: path }),
-  setIconPath: (path) => set({ iconPath: path }),
+  // config
+  setConfig: (config) => set({ config: config }),
+  loadConfig: async () => {
+    try {
+      const config = await invoke<AppConfig>("get_config");
+      set({ config });
+    } catch (err) {
+      console.error("Failed to load config:", err);
+    }
+  },
+  updateConfig: async (partialConfig) => {
+    const updatedConfig = { ...get().config, ...partialConfig };
+    set({ config: updatedConfig });
+
+    try {
+      await invoke("update_config", { config: updatedConfig });
+    } catch (err) {
+      console.error("Failed to save config:", err);
+    }
+  },
   setIsServerReady: (state) => set({ isServerReady: state }),
+
+  // messages
   addMessage: (m) => set((state) => ({ messages: [...state.messages, m] })),
   setMessages: (ms) => set({ messages: ms }),
   clearMessages: () => {
@@ -58,6 +82,8 @@ export const useAppStore = create<AppState>((set) => ({
     });
     set({ isCleared: true });
   },
+
+  //states
   setIsLoading: (state) => set({ isLoading: state }),
   setError: (e) => set({ error: e }),
   setIsExpanded: (state) => set({ isExpanded: state }),
