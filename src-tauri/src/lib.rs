@@ -7,6 +7,57 @@ use tauri::LogicalSize;
 use tauri::Manager;
 use std::fs;
 use serde::{Serialize, Deserialize};
+use openrouter_rs::{
+    OpenRouterClient,
+    api::chat::{ChatCompletionRequest, Message as ORMessage},
+    types::Role
+};
+
+#[derive(serde::Deserialize)]
+pub struct UserMessage {
+    pub role: String,
+    pub content: String
+}
+
+#[tauri::command]
+async fn ask_openrouter(
+    api_key: String,
+    model: String,
+    messages: Vec<UserMessage>
+) -> Result<String, String> {
+    let client = OpenRouterClient::builder()
+      .api_key(&api_key)
+      .http_referer("https://github.com/nonseww/Kaorii")
+      .x_title("Kaorii AI")
+      .build()
+      .map_err(|e| e.to_string())?;
+
+    let api_messages: Vec<ORMessage> = messages.into_iter().map(|m| {
+        let role = match m.role.as_str() {
+        "system" => Role::System,
+        "assistant" => Role::Assistant,
+        _ => Role::User,
+        };
+        ORMessage::new(role, m.content)
+    }).collect();
+
+    let request = ChatCompletionRequest::builder()
+      .model(&model)
+      .messages(api_messages)
+      .temperature(0.5)
+      .build()
+      .map_err(|e| e.to_string())?;
+
+    let response = client.chat().create(&request).await
+      .map_err(|e| e.to_string())?;
+
+    let ai_answer = response.choices[0]
+      .content()
+      .clone()
+      .unwrap_or_else(|| "No response").to_string();
+    
+    Ok(ai_answer)
+}
 
 #[derive(Serialize, Deserialize, Default)]
 struct AppConfig {
@@ -153,7 +204,8 @@ pub fn run() {
             save_icon_path,
             resize_window, 
             copy_selected_text, 
-            move_app_to_side
+            move_app_to_side,
+            ask_openrouter
         ])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
