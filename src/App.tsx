@@ -10,12 +10,16 @@ import { useModelPath } from "./hooks/useModelPath";
 import { useAppStore } from "./store/useAppStore";
 import { useAppActions } from "./hooks/useAppActions";
 import "./App.css";
+import { useIconPath } from "./hooks/useIconPath";
 
 function App() {
   const store = useAppStore();
   const toggleWindow = useToggleWindow();
+
   useLlamaServer();
-  const { handleSelectModel } = useModelPath();
+  useModelPath();
+  useIconPath();
+
   const {
     handleSummarize,
     handleTranslate,
@@ -45,10 +49,7 @@ function App() {
   return (
     <>
       {store.isExpanded ? (
-        <Chat
-          handleSelectModel={handleSelectModel}
-          toggleWindow={toggleWindow}
-        />
+        <Chat toggleWindow={toggleWindow} />
       ) : (
         <SmallWidget onClick={toggleWindow} />
       )}
