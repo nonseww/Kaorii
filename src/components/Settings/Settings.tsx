@@ -10,11 +10,21 @@ export const Settings = ({ handleSelectModel }: Props) => {
 
   return (
     <div className={classes.settings}>
-      <div>
-        <span>Current model path: </span>
-        <span>{store.modelPath ?? "undefined"}</span>
+      <div className={classes.field}>
+        <div className={classes.labelRow}>
+          <span className={classes.label}>Local GGUF Model</span>
+          <input
+            className={classes.modelPathText}
+            value={store.modelPath ?? "No model selected..."}
+          />
+        </div>
+        <button
+          onClick={handleSelectModel}
+          className={classes.chooseModelButton}
+        >
+          Choose model
+        </button>
       </div>
-      <button onClick={handleSelectModel}>Choose model</button>
     </div>
   );
 };
