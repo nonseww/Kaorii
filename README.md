@@ -1,4 +1,4 @@
-# Kaorii
+# Kaorii-AI
 
 A lightweight, privacy-focused desktop AI assistant built with Tauri, React, and llama.cpp. Kaorii lives as a floating widget on your desktop, providing instant access to a local Large Language Model (LLM) for high-speed AI assistance without compromising your data.
 
@@ -48,8 +48,8 @@ Kaorii is designed to be used without leaving your current workflow.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/nonseww/Kaorii.git
-cd Kaorii
+git clone https://github.com/nonseww/Kaorii-AI.git
+cd Kaorii-AI
 ```
 
 2. Install dependencies:
