@@ -6,7 +6,8 @@ use tauri::Manager;
 pub struct AppConfig {
     pub model_path: Option<String>,
     pub icon_path: Option<String>,
-    pub api_model: Option<String>
+    pub api_model: Option<String>,
+    pub api_key_masked: Option<String>,
 }
 
 fn get_config_path(app_handle: &tauri::AppHandle) -> std::path::PathBuf {

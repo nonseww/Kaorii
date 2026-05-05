@@ -8,9 +8,9 @@ interface Props {
 
 export const SettingField = ({ label, children }: Props) => {
   return (
-    <form className={classes.field}>
+    <div className={classes.field}>
       <span className={classes.label}>{label}</span>
       {children}
-    </form>
+    </div>
   );
 };

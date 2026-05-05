@@ -24,6 +24,30 @@ export const useConfig = () => {
     }
   };
 
+  const handleSelectApiModel = async ({
+    modelName,
+    apiKey,
+  }: {
+    modelName: string;
+    apiKey: string;
+  }) => {
+    if (modelName && apiKey) {
+      try {
+        store.setError("");
+        store.setIsServerReady(false);
+        await store.updateConfig({
+          api_key_masked: apiKey,
+          api_model: modelName,
+        });
+        store.clearMessages();
+        return true;
+      } catch (e) {
+        console.error("Failed to save api model:", e);
+        return false;
+      }
+    }
+  };
+
   const handleSelectIcon = async () => {
     const selectedIcon = await open({
       multiple: false,
@@ -39,5 +63,5 @@ export const useConfig = () => {
     }
   };
 
-  return { handleSelectIcon, handleSelectModel };
+  return { handleSelectIcon, handleSelectApiModel, handleSelectModel };
 };

@@ -33,6 +33,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     model_path: null,
     icon_path: null,
     api_model: null,
+    api_key_masked: null,
   },
   isServerReady: false,
   isCheckingModel: true,
@@ -58,7 +59,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
   updateConfig: async (partialConfig) => {
-    const updatedConfig = { ...get().config, ...partialConfig };
+    let updatedConfig = { ...get().config, ...partialConfig };
+
+    if (partialConfig.api_key_masked) {
+      await invoke("save_api_key", { key: partialConfig.api_key_masked });
+      const masked = `${partialConfig.api_key_masked}`.slice(0, 15) + "...";
+      updatedConfig = { ...updatedConfig, api_key_masked: masked };
+    }
+
     set({ config: updatedConfig });
 
     try {

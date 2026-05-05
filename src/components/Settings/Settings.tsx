@@ -6,17 +6,23 @@ import classes from "./Settings.module.scss";
 
 export const Settings = () => {
   const store = useAppStore();
-  const { handleSelectModel, handleSelectIcon } = useConfig();
+  const { handleSelectModel, handleSelectIcon, handleSelectApiModel } =
+    useConfig();
   const [openrouterData, setOpenrouterData] = useState<{
     modelName: string;
     apiKey: string;
   }>({
     modelName: store.config.api_model ?? "",
-    apiKey: "",
+    apiKey: store.config.api_key_masked ?? "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOpenrouterData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    await handleSelectApiModel(openrouterData);
   };
 
   return (
@@ -47,12 +53,12 @@ export const Settings = () => {
             required
             name="apiKey"
           />
-          <div className={classes.buttonsContainer}>
+          <form className={classes.buttonsContainer}>
             <button onClick={() => {}}>Delete API Key</button>
-            <button type="submit" onClick={() => {}}>
+            <button type="submit" onClick={handleSubmit}>
               Save
             </button>
-          </div>
+          </form>
         </>
       </SettingField>
 
