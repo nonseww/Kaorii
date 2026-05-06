@@ -38,8 +38,9 @@ export const useAppInit = () => {
       store.isServerReady &&
       !store.isLoading
     ) {
+      console.log("greet!");
       sendGreeting();
       store.setIsCleared(false);
     }
-  }, [store.isServerReady, store.isCleared]);
+  }, [store.isServerReady, store.isCleared, store.config.engine_type]);
 };

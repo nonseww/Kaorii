@@ -5,8 +5,10 @@ const KEY_NAME: &str = "openrouter_api_key";
 
 #[tauri::command]
 pub fn save_api_key(key: String) -> Result<(), String> {
+    println!(">>> RUST: Received request to save key: {}...", &key[..4]);
     let entry = Entry::new(SERVICE_NAME, KEY_NAME).map_err(|e| e.to_string())?;
     entry.set_password(&key).map_err(|e| e.to_string())?;
+    println!(">>> RUST: Key saved successfully to OS keyring");
     Ok(())
 }
 

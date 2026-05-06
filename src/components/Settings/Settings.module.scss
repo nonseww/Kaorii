@@ -13,3 +13,65 @@
   display: flex;
   gap: 10px;
 }
+.engineTypeContainer {
+  position: absolute;
+  right: 25px;
+  top: 10px;
+
+  label,
+  button {
+    font-size: 13px;
+    font-family: monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  label {
+    color: #4ade80;
+
+    display: flex;
+    align-items: center;
+
+    &::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background-color: #4ade80;
+      border-radius: 50%;
+      margin-right: 8px;
+      box-shadow: 0 0 8px #4ade80;
+    }
+  }
+
+  button {
+    background-color: transparent;
+    border: 1px solid #444;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+
+    &::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border: 1px solid #666;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    &:hover {
+      color: #fff;
+      border-color: #777;
+      background-color: rgba(255, 255, 255, 0.05);
+
+      &::before {
+        border-color: #fff;
+        background-color: #fff;
+        box-shadow: 0 0 8px #fff;
+      }
+    }
+  }
+}

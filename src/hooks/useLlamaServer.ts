@@ -5,18 +5,35 @@ import { useAppStore } from "../store/useAppStore";
 
 export const useLlamaServer = () => {
   const config = useAppStore((s) => s.config);
+  const isConfigLoaded = useAppStore((s) => s.isConfigLoaded);
   const setIsServerReady = useAppStore((s) => s.setIsServerReady);
   const childRef = useRef<Child | null>(null);
 
   useEffect(() => {
-    if (!config.model_path) return;
+    if (!isConfigLoaded) return;
+
+    let healthCheckInterval: number | undefined;
     let isMounted = true;
 
-    const startLlamaServer = async () => {
-      setIsServerReady(false);
+    const manageServer = async () => {
+      if (config.engine_type === "api") {
+        setIsServerReady(true);
+        if (childRef.current) {
+          await childRef.current.kill();
+          childRef.current = null;
+        }
+        return;
+      }
+
+      if (config.engine_type === "local") {
+        setIsServerReady(false);
+
+        if (!config.model_path) {
+          return;
+        }
+      }
 
       if (childRef.current) {
-        console.log("Killing old server process...");
         try {
           await childRef.current.kill();
           childRef.current = null;
@@ -27,8 +44,6 @@ export const useLlamaServer = () => {
       }
 
       if (!isMounted) return;
-
-      console.log("Starting new server with:", config.model_path);
 
       const command = Command.sidecar("binaries/llama-server", [
         "-m",
@@ -47,7 +62,20 @@ export const useLlamaServer = () => {
       try {
         const child = await command.spawn();
         childRef.current = child;
+
+        if (!isMounted) {
+          await child.kill();
+          return;
+        }
+
         console.log("New server spawned. PID:", child.pid);
+
+        healthCheckInterval = setInterval(async () => {
+          const isHealthy = await checkServerHealth();
+          if (isMounted) {
+            setIsServerReady(isHealthy);
+          }
+        }, 2000);
       } catch (e) {
         console.error(
           "Failed to spawn server. Port 8080 might still be blocked.",
@@ -56,18 +84,17 @@ export const useLlamaServer = () => {
       }
     };
 
-    startLlamaServer();
+    manageServer();
 
-    const healthCheckInterval = setInterval(async () => {
-      const isHealthy = await checkServerHealth();
-      setIsServerReady(isHealthy);
-    }, 2000);
     return () => {
-      clearInterval(healthCheckInterval);
+      isMounted = false;
+      if (healthCheckInterval) {
+        clearInterval(healthCheckInterval);
+      }
       if (childRef.current) {
         childRef.current.kill();
         childRef.current = null;
       }
     };
-  }, [config.model_path]);
+  }, [config.model_path, config.engine_type, isConfigLoaded]);
 };

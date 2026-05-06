@@ -6,8 +6,12 @@ import classes from "./Settings.module.scss";
 
 export const Settings = () => {
   const store = useAppStore();
-  const { handleSelectModel, handleSelectIcon, handleSelectApiModel } =
-    useConfig();
+  const {
+    handleSelectModel,
+    handleSelectIcon,
+    handleSelectApiModel,
+    handleSwitchEngine,
+  } = useConfig();
   const [openrouterData, setOpenrouterData] = useState<{
     modelName: string;
     apiKey: string;
@@ -29,6 +33,15 @@ export const Settings = () => {
     <div className={classes.settings}>
       <SettingField label="Local GGUF Model">
         <>
+          <div className={classes.engineTypeContainer}>
+            {store.config.engine_type === "local" ? (
+              <label>Active</label>
+            ) : (
+              <button onClick={() => handleSwitchEngine("local")}>
+                Activate
+              </button>
+            )}
+          </div>
           <input
             value={store.config.model_path ?? "No model selected..."}
             readOnly
@@ -39,6 +52,15 @@ export const Settings = () => {
 
       <SettingField label="OpenRouter Model">
         <>
+          <div className={classes.engineTypeContainer}>
+            {store.config.engine_type === "api" ? (
+              <label>Active</label>
+            ) : (
+              <button onClick={() => handleSwitchEngine("api")}>
+                Activate
+              </button>
+            )}
+          </div>
           <input
             value={openrouterData.modelName}
             onChange={handleChange}

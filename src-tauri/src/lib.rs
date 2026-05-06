@@ -22,7 +22,7 @@ pub fn run() {
             window_extra::move_app_to_side,
             ai::ask_openrouter,
             security::save_api_key,
-            security::delete_api_key
+            security::delete_api_key,
         ])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {

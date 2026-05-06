@@ -8,6 +8,7 @@ interface AppState {
   config: AppConfig;
   isServerReady: boolean;
   isCheckingModel: boolean;
+  isConfigLoaded: boolean;
   setConfig: (config: AppConfig) => void;
   loadConfig: () => Promise<void>;
   updateConfig: (partialConfig: Partial<AppConfig>) => void;
@@ -34,9 +35,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     icon_path: null,
     api_model: null,
     api_key_masked: null,
+    engine_type: "local",
   },
   isServerReady: false,
   isCheckingModel: true,
+  isConfigLoaded: false,
   messages: [
     {
       role: "system",
@@ -53,9 +56,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   loadConfig: async () => {
     try {
       const config = await invoke<AppConfig>("get_config");
-      set({ config });
+      set({ config, isConfigLoaded: true });
     } catch (err) {
       console.error("Failed to load config:", err);
+      set({ isConfigLoaded: true });
     }
   },
   updateConfig: async (partialConfig) => {

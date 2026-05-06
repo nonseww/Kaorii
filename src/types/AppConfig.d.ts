@@ -3,4 +3,5 @@ export type AppConfig = {
   icon_path: string | null;
   api_model: string | null;
   api_key_masked: string | null;
+  engine_type: "local" | "api";
 };
