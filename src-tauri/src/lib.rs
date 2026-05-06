@@ -1,142 +1,10 @@
-use std::thread;
-use std::time::Duration;
-
-use enigo::Enigo;
-use enigo::KeyboardControllable;
 use tauri::LogicalSize;
 use tauri::Manager;
-use std::fs;
-use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Default)]
-struct AppConfig {
-    model_path: Option<String>,
-    icon_path: Option<String>
-}
-
-fn get_config_path(app_handle: &tauri::AppHandle) -> std::path::PathBuf {
-    app_handle.path().app_config_dir().unwrap().join("config.json")
-}
-
-fn load_current_config(app_handle: &tauri::AppHandle) -> AppConfig {
-    let config_path = get_config_path(&app_handle);
-    if let Ok(json) = fs::read_to_string(config_path) {
-        serde_json::from_str(&json).unwrap_or_default() 
-    } else {
-        AppConfig::default()
-    }
-}
-
-fn save_config_to_disk(app_handle: &tauri::AppHandle, config: AppConfig) -> Result<(), String> {
-    let config_path = get_config_path(&app_handle);
-    let config_dir = config_path.parent().unwrap();
-    fs::create_dir_all(config_dir).map_err(|e| e.to_string())?;
-    let json = serde_json::to_string(&config).map_err(|e| e.to_string())?;
-    fs::write(config_path, json).map_err(|e| e.to_string())?;
-    Ok(())
-}
-
-#[tauri::command]
-fn save_model_path(app_handle: tauri::AppHandle, path: String) -> Result<(), String> {
-    let mut config = load_current_config(&app_handle);
-    config.model_path = Some(path);
-    save_config_to_disk(&app_handle, config)
-}
-
-#[tauri::command]
-fn save_icon_path(app_handle: tauri::AppHandle, path: String) -> Result<(), String> {
-    let mut config = load_current_config(&app_handle);
-    config.icon_path = Some(path);
-    save_config_to_disk(&app_handle, config)
-}
-
-#[tauri::command]
-fn get_model_path(app_handle: tauri::AppHandle) -> Result<String, String> {
-    let config_path = get_config_path(&app_handle);
-    if config_path.exists() {
-        let json = fs::read_to_string(config_path).map_err(|e| e.to_string())?;
-        let config: AppConfig = serde_json::from_str(&json).map_err(|e| e.to_string())?;
-        if let Some(path) = config.model_path {
-            if std::path::Path::new(&path).exists() {
-                return Ok(path);
-            }
-        }
-    }
-    Err("NOT_FOUND".to_string())
-}
-
-#[tauri::command]
-fn get_icon_path(app_handle: tauri::AppHandle) -> Result<String, String> {
-    let config_path = get_config_path(&app_handle);
-    if config_path.exists() {
-        let json = fs::read_to_string(config_path).map_err(|e| e.to_string())?;
-        let config: AppConfig = serde_json::from_str(&json).map_err(|e| e.to_string())?;
-        if let Some(path) = config.icon_path {
-            if std::path::Path::new(&path).exists() {
-                return Ok(path);
-            }
-        }
-    }
-    Err("NOT_FOUND".to_string())
-}
-
-#[tauri::command]
-fn resize_window(window: tauri::WebviewWindow, expanded: bool) {
-    let (w, h) = if expanded {
-        (450.0, 600.0)
-    } else {
-        (60.0, 60.0)
-    };
-    let _ = window.set_size(tauri::LogicalSize::new(w, h));
-
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(gtk_window) = window.gtk_window() {
-            use gtk::prelude::*;
-            gtk_window.set_size_request(w as i32, h as i32);
-        }
-    }
-
-    if expanded {
-        let _ = window.unminimize();
-        let _ = window.show();
-        let _ = window.set_focus();
-    }
-}
-
-#[tauri::command]
-fn copy_selected_text() {
-    let mut enigo = Enigo::new();
-    thread::sleep(Duration::from_millis(300));
-
-    enigo.key_down(enigo::Key::Control);
-    enigo.key_click(enigo::Key::Layout('c'));
-    enigo.key_up(enigo::Key::Control);
-}
-
-#[tauri::command]
-fn move_app_to_side(window: tauri::WebviewWindow, side: String) -> Result<(), String> {
-    if let Ok(Some(monitor)) = window.current_monitor() {
-        let scale_factor = monitor.scale_factor();
-         let start_pos = window.outer_position().unwrap_or_default().to_logical::<f64>(scale_factor);
-
-        let work_area = monitor.work_area();
-        let window_size = window.outer_size().unwrap_or_default().to_logical::<f64>(scale_factor);
-
-        let work_area_logical_pos = work_area.position.to_logical::<f64>(scale_factor);
-        let work_area_logical_size = work_area.size.to_logical::<f64>(scale_factor);
-
-        let y = start_pos.y;
-        let x = if side == "left" {
-            work_area_logical_pos.x
-        } else {
-            work_area_logical_pos.x + work_area_logical_size.width - window_size.width
-        };
-
-        window.set_position(tauri::LogicalPosition::new(x, y)).map_err(|e| e.to_string())?;
-    }
-    Ok(())
-}
+mod config;
+mod ai;
+mod security;
+mod window_extra;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -147,13 +15,14 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            get_model_path, 
-            get_icon_path,
-            save_model_path,
-            save_icon_path,
-            resize_window, 
-            copy_selected_text, 
-            move_app_to_side
+            config::get_config,
+            config::update_config,
+            window_extra::resize_window, 
+            window_extra::copy_selected_text, 
+            window_extra::move_app_to_side,
+            ai::ask_openrouter,
+            security::save_api_key,
+            security::delete_api_key,
         ])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
@@ -167,7 +36,7 @@ pub fn run() {
                 {
                     if let Ok(gtk_window) = window.gtk_window() {
                         use gtk::prelude::*;
-                        gtk_window.set_size_request(60, 60);
+                        gtk_window.set_size_request(70, 70);
                     }
                 }
                 let _ = window.set_focus();

@@ -29,12 +29,12 @@ export const Chat = ({ toggleWindow }: ChatProps) => {
   };
 
   useEffect(() => {
-    if (store.modelPath === null) {
+    if (store.config.model_path === null) {
       store.setError("> Invalid model path. Please, choice Model in Tools");
     } else {
       store.setError("");
     }
-  }, [store.modelPath]);
+  }, [store.config.model_path]);
 
   return (
     <>
